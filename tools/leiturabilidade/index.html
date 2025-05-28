@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Legibilidade</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Análise Avançada de Legibilidade de Arquivo Markdown</h1>
+        
+        <div class="language-selector">
+            <label for="language">Escolha o Idioma:</label>
+            <select id="language">
+                <option value="en-us">Inglês (Padrão)</option>
+                <option value="pt-br">Português (Brasil)</option>
+            </select>
+        </div>
+
+        <input type="file" id="fileInput" accept=".md">
+        <canvas id="wordFrequencyChart"></canvas>
+        <div class="results-area" id="resultsArea"></div>
+        <div class="report-area" id="reportArea"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="textstat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

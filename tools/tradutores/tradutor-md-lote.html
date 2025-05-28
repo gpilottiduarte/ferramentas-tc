@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradutor (PT → EN)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .step {
+            margin-bottom: 30px;
+        }
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        #fileList {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+        #fileList li {
+            background-color: #ecf0f1;
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            word-break: break-all; /* Previne overflow em nomes longos */
+        }
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            transition: background 0.3s;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        /* Removido .preview */
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+        }
+        .stat-item {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 4px;
+            flex: 1;
+            text-align: center;
+            min-width: 120px; /* Garante um tamanho mínimo */
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 10px;
+            background-color: #3498db;
+            width: 0%;
+            /* transition: width 0.3s; remova a transição para atualizações de progresso rápidas */
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .hidden {
+            display: none;
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle; /* Alinha o spinner com o texto do botão */
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Removido .proxy-options pois não usaremos proxies públicos */
+    </style>
+</head>
+<body>
+    <h1>Tradutor de Markdown (PT → EN)</h1>
+
+    <div class="card">
+        <div class="step">
+            <div class="step-title">
+                <div class="step-number">1</div>
+                Upload dos Arquivos Markdown
+            </div>
+            <div class="form-group">
+                <label for="markdownFiles">Selecione um ou mais arquivos Markdown (.md):</label>
+                <input type="file" id="markdownFiles" accept=".md" multiple>
+            </div>
+            <div id="fileListContainer" class="form-group hidden">
+                <label>Arquivos Selecionados:</label>
+                <ul id="fileList">
+                    </ul>
+            </div>
+             </div>
+    </div>
+
+    <div class="card">
+        <div class="step">
+            <div class="step-title">
+                <div class="step-number">2</div>
+                Tradução
+            </div>
+            <button id="translateBtn" class="btn" disabled>Traduzir Documentos Selecionados</button>
+            <div id="translationProgress" class="progress-container hidden">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <div id="translationStatus" class="alert alert-info hidden"></div>
+            <div id="overallProgress" class="stats hidden" style="margin-top: 10px;">
+                <div class="stat-item">
+                    <div id="translatedCount" class="stat-value">0</div>
+                    <div class="stat-label">Arquivos Traduzidos</div>
+                </div>
+                <div class="stat-item">
+                    <div id="errorCount" class="stat-value">0</div>
+                    <div class="stat-label">Erros</div>
+                </div>
+                 <div class="stat-item">
+                    <div id="totalFiles" class="stat-value">0</div>
+                    <div class="stat-label">Total de Arquivos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultCard" class="card hidden">
+        <div class="step">
+            <div class="step-title">
+                <div class="step-number">3</div>
+                Download dos Arquivos Traduzidos
+            </div>
+            <div class="alert alert-success">
+                 Todas as traduções foram concluídas! Baixe o arquivo ZIP contendo todos os documentos traduzidos.
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <button id="downloadZipBtn" class="btn">Baixar Arquivo ZIP</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+        // Elementos da interface
+        // const apiKeyInput = document.getElementById('apiKey'); // Removido
+        const filesInput = document.getElementById('markdownFiles');
+        const fileListContainer = document.getElementById('fileListContainer');
+        const fileListEl = document.getElementById('fileList');
+
+        const translateBtn = document.getElementById('translateBtn');
+        const translationProgress = document.getElementById('translationProgress');
+        const progressBar = document.getElementById('progressBar');
+        const translationStatus = document.getElementById('translationStatus');
+        const resultCard = document.getElementById('resultCard');
+        const downloadZipBtn = document.getElementById('downloadZipBtn');
+
+        // Elementos para progresso geral
+        const overallProgress = document.getElementById('overallProgress');
+        const translatedCountEl = document.getElementById('translatedCount');
+        const errorCountEl = document.getElementById('errorCount');
+        const totalFilesEl = document.getElementById('totalFiles');
+
+
+        // Variáveis globais
+        let selectedFiles = [];
+        let translatedFiles = {};
+        let translationErrors = {};
+
+
+        // Removido o carregamento e salvamento da chave da API do armazenamento local
+        window.addEventListener('DOMContentLoaded', () => {
+            // Não há mais chave para carregar ou definir
+        });
+
+        // Processar arquivos quando selecionados
+        filesInput.addEventListener('change', async (e) => {
+            selectedFiles = Array.from(e.target.files);
+            translatedFiles = {};
+            translationErrors = {};
+
+            fileListEl.innerHTML = '';
+
+            if (selectedFiles.length > 0) {
+                fileListContainer.classList.remove('hidden');
+                translateBtn.disabled = false;
+
+                selectedFiles.forEach(file => {
+                    const li = document.createElement('li');
+                    li.textContent = `${file.name} (Pronto para traduzir)`;
+                    li.id = `file-status-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                    fileListEl.appendChild(li);
+                });
+
+                totalFilesEl.textContent = selectedFiles.length;
+                translatedCountEl.textContent = 0;
+                errorCountEl.textContent = 0;
+                overallProgress.classList.remove('hidden');
+
+            } else {
+                fileListContainer.classList.add('hidden');
+                translateBtn.disabled = true;
+                overallProgress.classList.add('hidden');
+            }
+
+            resultCard.classList.add('hidden');
+            translationStatus.classList.add('hidden');
+            translationProgress.classList.add('hidden');
+        });
+
+
+        // Iniciar tradução em massa
+        translateBtn.addEventListener('click', async () => {
+            // const apiKey = apiKeyInput.value.trim(); // Removido: A chave agora está no backend
+
+            // if (!apiKey) { // Removido: Verificação de API Key no frontend não é mais necessária
+            //     showAlert('Por favor, insira uma chave de API válida', 'error');
+            //     return;
+            // }
+
+            if (selectedFiles.length === 0) {
+                showAlert('Por favor, selecione um ou mais arquivos para traduzir', 'error');
+                return;
+            }
+
+            // Desabilitar botão durante a tradução
+            translateBtn.disabled = true;
+            translateBtn.innerHTML = '<span class="spinner"></span>Traduzindo...';
+
+            // Resetar progresso e status
+            translatedFiles = {};
+            translationErrors = {};
+            translatedCountEl.textContent = 0;
+            errorCountEl.textContent = 0;
+            progressBar.style.width = '0%';
+            translationProgress.classList.remove('hidden');
+            showStatus(`Iniciando tradução de ${selectedFiles.length} arquivo(s)...`, 'info');
+            resultCard.classList.add('hidden');
+
+            let completedTranslations = 0;
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const originalFilename = file.name;
+                const fileStatusElementId = `file-status-${originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+                const fileStatusEl = document.getElementById(fileStatusElementId);
+
+
+                 if (fileStatusEl) {
+                     fileStatusEl.textContent = `${originalFilename} (Lendo...)`;
+                     fileStatusEl.style.color = '#333';
+                 }
+
+                try {
+                    const originalContent = await readFileContent(file);
+
+                     if (fileStatusEl) {
+                        fileStatusEl.textContent = `${originalFilename} (Traduzindo...)`;
+                        fileStatusEl.style.color = '#3498db';
+                     }
+
+                    // Chamar a função de tradução (sem a apiKey)
+                    const translatedText = await translateMarkdown(originalContent);
+
+                    translatedFiles[originalFilename] = translatedText;
+
+                    completedTranslations++;
+                     if (fileStatusEl) {
+                        fileStatusEl.textContent = `${originalFilename} (Concluído)`;
+                        fileStatusEl.style.color = 'green';
+                     }
+                    translatedCountEl.textContent = Object.keys(translatedFiles).length;
+                    const progress = Math.round((completedTranslations / selectedFiles.length) * 100);
+                    progressBar.style.width = `${progress}%`;
+
+
+                } catch (error) {
+                    console.error(`Erro ao traduzir o arquivo ${originalFilename}:`, error);
+                    translationErrors[originalFilename] = error.message;
+                    completedTranslations++;
+
+                    const fileStatusEl = document.getElementById(fileStatusElementId);
+                    if (fileStatusEl) {
+                       const displayErrorMessage = error.message.substring(0, 100) + (error.message.length > 100 ? '...' : '');
+                       fileStatusEl.textContent = `${originalFilename} (Erro: ${displayErrorMessage})`;
+                       fileStatusEl.style.color = 'red';
+                    }
+                    errorCountEl.textContent = Object.keys(translationErrors).length;
+                    const progress = Math.round((completedTranslations / selectedFiles.length) * 100);
+                    progressBar.style.width = `${progress}%`;
+                }
+            }
+
+            translateBtn.disabled = false;
+            translateBtn.innerHTML = 'Traduzir Documentos Selecionados';
+            translationProgress.classList.add('hidden');
+
+            if (Object.keys(translatedFiles).length > 0) {
+                 showStatus(`Tradução em massa concluída. ${Object.keys(translatedFiles).length} arquivo(s) traduzido(s) com sucesso, ${Object.keys(translationErrors).length} erro(s).`, 'success');
+                 resultCard.classList.remove('hidden');
+            } else if (Object.keys(translationErrors).length === selectedFiles.length && selectedFiles.length > 0) {
+                 showStatus(`Falha na tradução de todos os arquivos (${Object.keys(translationErrors).length} erros). Verifique a chave da API.`, 'error');
+                 resultCard.classList.add('hidden');
+            } else {
+                 showStatus(`Tradução em massa concluída com ${Object.keys(translationErrors).length} erro(s). Alguns arquivos podem ter falhado.`, 'warning');
+                 if (Object.keys(translatedFiles).length > 0) {
+                     resultCard.classList.remove('hidden');
+                 } else {
+                      resultCard.classList.add('hidden');
+                 }
+            }
+
+        });
+
+        // Função para ler o conteúdo do arquivo
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => resolve(event.target.result);
+                reader.onerror = (error) => reject(error);
+                reader.readAsText(file);
+            });
+        }
+
+        // Função para traduzir o markdown usando o proxy PHP
+        async function translateMarkdown(markdownText) {
+            const instructionText =
+                "Translate the following markdown document from Portuguese to English. " +
+                "IMPORTANT: Keep all markdown formatting intact, including headers (#), lists, links, etc. " +
+                "Do not translate code blocks or variable names.";
+
+            const fullText = instructionText + "\n\n" + markdownText;
+
+            // URL do seu proxy PHP
+            const proxyUrl = './proxy.php';
+
+            const payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            { "text": fullText }
+                        ]
+                    }
+                ]
+            };
+
+            try {
+                console.log(`Chamando proxy para tradução: ${proxyUrl}`);
+                const response = await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        // A chave da API NÃO é enviada aqui do frontend
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorText = errorJson.error.message || errorText;
+                    } catch (e) { /* ignore */ }
+                    console.error(`Erro recebido do proxy: Status ${response.status}`, errorText);
+                    throw new Error(`Erro do proxy (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
+                     console.error(`Resposta inválida do proxy:`, data);
+                     throw new Error(`Resposta inválida do proxy`);
+                }
+
+                const translatedText = data.candidates[0].content.parts[0].text.trim();
+
+                return translatedText;
+
+            } catch (error) {
+                console.error('Erro na tradução com proxy:', error);
+                throw error;
+            }
+        }
+
+        // Download do arquivo ZIP
+        downloadZipBtn.addEventListener('click', async () => {
+            if (Object.keys(translatedFiles).length === 0) {
+                showAlert('Nenhum arquivo traduzido para baixar.', 'warning');
+                return;
+            }
+
+            const zip = new JSZip();
+
+            for (const originalFilename in translatedFiles) {
+                if (translatedFiles.hasOwnProperty(originalFilename)) {
+                    const translatedText = translatedFiles[originalFilename];
+                    const baseName = originalFilename.replace(/\.md$/, '');
+                    const translatedFilename = `${baseName}_translated.md`;
+                    zip.file(translatedFilename, translatedText);
+                }
+            }
+
+            showStatus('Gerando arquivo ZIP...', 'info');
+            downloadZipBtn.disabled = true;
+            try {
+                const content = await zip.generateAsync({ type: "blob" });
+
+                const zipFilename = `translated_documents_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.zip`;
+                saveAs(content, zipFilename);
+
+                showStatus(`Arquivo ZIP salvo como: ${zipFilename}`, 'success');
+
+            } catch (error) {
+                showAlert(`Erro ao gerar o arquivo ZIP: ${error.message}`, 'error');
+                showStatus('Erro ao gerar arquivo ZIP.', 'error');
+                console.error('Erro ao gerar ZIP:', error);
+            } finally {
+                 downloadZipBtn.disabled = false;
+            }
+        });
+
+
+        // Função para mostrar alertas de status
+        function showStatus(message, type) {
+            translationStatus.textContent = message;
+            translationStatus.className = `alert alert-${type}`;
+            translationStatus.classList.remove('hidden');
+        }
+
+        // Função para mostrar alertas temporários
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+
+            document.body.insertBefore(alertDiv, document.body.firstChild);
+
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transition = 'opacity 0.5s';
+                setTimeout(() => alertDiv.remove(), 500);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Changelog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .step-container {
+            display: none;
+        }
+        .step-container.active {
+            display: block;
+        }
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .changelog-preview {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            margin-top: 20px;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 0.2em solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spinner-border .75s linear infinite;
+        }
+        @keyframes spinner-border {
+            to { transform: rotate(360deg); }
+        }
+        .api-key-input {
+            font-family: monospace;
+        }
+        .editable-cell {
+            min-height: 60px;
+            border: 1px solid #eee;
+            padding: 5px;
+            background-color: #ffffd9;
+        }
+        .editable-cell:focus {
+            outline: 2px solid #007bff;
+            background-color: #fff;
+        }
+        #progress-bar-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Gerador de Changelog Web</h1>
+
+        <div class="alert alert-info mb-4">
+            <p><strong>Nota:</strong> Esta versão utiliza a API do Google Gemini para gerar os textos.</p>
+        </div>
+
+        <ul class="nav nav-tabs mb-4" id="mainTabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-step="1">1. Dados de Entrada</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-step="2">2. Geração de Textos</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-step="3">3. Revisão</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-step="4">4. Documento Final</a>
+            </li>
+        </ul>
+
+        <div class="alert-container" id="alertContainer"></div>
+
+        <div id="progress-bar-container" class="progress">
+            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+        </div>
+
+        <div id="step1" class="step-container active">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Configuração</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="version" class="form-label">Número da Versão</label>
+                        <input type="text" class="form-control" id="version" placeholder="Ex: 1.2.3">
+                    </div>
+                    <div class="mb-3">
+                        <label for="geminiApiKey" class="form-label">Chave API do Google Gemini</label>
+                        <input type="text" class="form-control api-key-input" id="geminiApiKey"
+                               value="" placeholder="Insira sua chave API do Google Gemini aqui">
+                        <div class="form-text">Chave usada para gerar os textos de changelog via Google Gemini.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Dados das Issues</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Escolha como deseja fornecer os dados:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="dataSource" id="dataSourceUpload" checked>
+                            <label class="form-check-label" for="dataSourceUpload">
+                                Upload de arquivo CSV
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="dataSource" id="dataSourceManual">
+                            <label class="form-check-label" for="dataSourceManual">
+                                Entrada manual
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="uploadSection" class="mb-3">
+                        <label for="csvFile" class="form-label">Arquivo CSV com dados do Jira</label>
+                        <input class="form-control" type="file" id="csvFile" accept=".csv">
+                        <div class="form-text">
+                            O arquivo deve conter as colunas: "Tipo de item", "Chave da item", "Campo personalizado (Module)", "Resumo"
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-outline-secondary btn-sm" id="downloadTemplateBtn">
+                                <i class="fas fa-download"></i> Baixar Template CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="manualSection" class="mb-3" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="manualEntryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tipo de item</th>
+                                        <th>Chave da item</th>
+                                        <th>Módulo</th>
+                                        <th>Resumo</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <select class="form-select form-select-sm">
+                                                <option value="Melhoria">Melhoria</option>
+                                                <option value="Correção">Correção</option>
+                                                <option value="Nova Funcionalidade">Nova Funcionalidade</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control form-control-sm" placeholder="Ex: PROJ-123"></td>
+                                        <td><input type="text" class="form-control form-control-sm" placeholder="Ex: Frontend"></td>
+                                        <td><textarea class="form-control form-control-sm" rows="2" placeholder="Texto da issue para gerar o changelog"></textarea></td>
+                                        <td>
+                                            <button class="btn btn-danger btn-sm remove-row">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="addRowBtn">
+                            <i class="fas fa-plus"></i> Adicionar Linha
+                        </button>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary" id="goToStep2Btn">Próximo <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div id="step2" class="step-container">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Geração de Textos de Changelog</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Os textos serão gerados usando a API do Google Gemini. Este processo pode levar alguns minutos,
+                        dependendo do número de issues e da velocidade da sua conexão.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Instruções para a IA:</label>
+                        <textarea class="form-control" id="aiInstructions" rows="4">Crie um texto de changelog em português (PT-BR) para a seguinte correção ou melhoria. O texto deve ser conciso, técnico e seguir o formato: [Verbo no passado] + [descrição da mudança] + [benefício para o usuário, se aplicável].</textarea>
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered table-sm" id="issuesTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Tipo</th>
+                                    <th style="width: 10%">Chave</th>
+                                    <th style="width: 15%">Módulo</th>
+                                    <th style="width: 30%">Resumo</th>
+                                    <th style="width: 30%">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-secondary" id="backToStep1Btn"><i class="fas fa-arrow-left"></i> Anterior</button>
+                    <div>
+                        <button class="btn btn-success" id="generateAllBtn">
+                            <i class="fas fa-magic"></i> Gerar Todos os Textos
+                        </button>
+                        <button class="btn btn-primary" id="goToStep3Btn">Próximo <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step3" class="step-container">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Revisão dos Textos de Changelog</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-edit"></i>
+                        Revise e edite os textos gerados conforme necessário. Clique em uma célula para editá-la.
+                    </div>
+
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered table-sm" id="reviewTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Tipo</th>
+                                    <th style="width: 10%">Chave</th>
+                                    <th style="width: 15%">Módulo</th>
+                                    <th style="width: 60%">Texto do Changelog</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-secondary" id="backToStep2Btn"><i class="fas fa-arrow-left"></i> Anterior</button>
+                    <div>
+                        <button class="btn btn-success" id="saveReviewBtn">
+                            <i class="fas fa-save"></i> Salvar Revisão
+                        </button>
+                        <button class="btn btn-primary" id="goToStep4Btn">Próximo <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step4" class="step-container">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Documento Final</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="documentTitle" class="form-label">Título do Documento</label>
+                        <input type="text" class="form-control" id="documentTitle"
+                               placeholder="Ex: Release Notes - Versão 1.2.3">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="documentIntro" class="form-label">Texto de Introdução</label>
+                        <textarea class="form-control" id="documentIntro" rows="3"
+                                 placeholder="Introdução para o documento de release notes..."></textarea>
+                    </div>
+
+                    <div class="changelog-preview" id="documentPreview">
+                        <h4 class="text-center">Prévia do Documento</h4>
+                        <div id="previewContent">
+                            </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button class="btn btn-secondary" id="backToStep3Btn"><i class="fas fa-arrow-left"></i> Anterior</button>
+                    <div>
+                        <button class="btn btn-success" id="exportHtmlBtn">
+                            <i class="fas fa-file-code"></i> Exportar HTML
+                        </button>
+                        <button class="btn btn-primary" id="exportMarkdownBtn">
+                            <i class="fas fa-file-alt"></i> Exportar MD
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+        // Dados globais
+        let issuesData = [];
+        let generatedTexts = {};
+
+        // Elementos DOM
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const step4 = document.getElementById('step4');
+        const progressBarContainer = document.getElementById('progress-bar-container');
+        const progressBar = document.getElementById('progressBar');
+
+        // Função para mostrar alertas
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.getElementById('alertContainer').appendChild(alertDiv);
+
+            // Auto-remover após 5 segundos
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }
+
+        // Função para atualizar a barra de progresso
+        function updateProgressBar(percent, show = true) {
+            progressBar.style.width = `${percent}%`;
+            progressBarContainer.style.display = show ? 'block' : 'none';
+        }
+
+        // Navegação entre abas
+        document.querySelectorAll('#mainTabs .nav-link').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const step = this.getAttribute('data-step');
+                goToStep(parseInt(step));
+            });
+        });
+
+        function goToStep(stepNumber) {
+            // Verificar se pode avançar
+            if (stepNumber === 2 && issuesData.length === 0) {
+                showAlert('Por favor, adicione dados de issues antes de continuar.', 'warning');
+                return;
+            }
+
+            // Para ir para a etapa 3, precisa ter gerado pelo menos um texto
+             if (stepNumber === 3) {
+                 const generatedCount = Object.keys(generatedTexts).length;
+                 if (generatedCount === 0) {
+                     showAlert('Por favor, gere pelo menos um texto de changelog antes de continuar.', 'warning');
+                     return;
+                 }
+                 // Atualiza a tabela de revisão antes de mostrar a etapa
+                 renderReviewTable();
+             }
+
+             // Para ir para a etapa 4, precisa ter gerado pelo menos um texto (e passado pela revisão)
+             if (stepNumber === 4) {
+                  const generatedCount = Object.keys(generatedTexts).length;
+                  if (generatedCount === 0) {
+                      showAlert('Por favor, gere textos de changelog na Etapa 2 antes de continuar.', 'warning');
+                      return;
+                  }
+                  // Atualiza a prévia antes de mostrar a etapa
+                  renderDocumentPreview();
+             }
+
+
+            // Atualizar abas
+            document.querySelectorAll('#mainTabs .nav-link').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-step') == stepNumber) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Mostrar etapa correta
+            document.querySelectorAll('.step-container').forEach(container => {
+                container.classList.remove('active');
+            });
+
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+
+            // Ações específicas por etapa
+            if (stepNumber === 2) {
+                renderIssuesTable();
+            } /*else if (stepNumber === 3) {
+                renderReviewTable(); // Já movido para a verificação no início da função
+            } else if (stepNumber === 4) {
+                renderDocumentPreview(); // Já movido para a verificação no início da função
+            }*/
+        }
+
+        // Alternância entre upload e entrada manual
+        document.getElementById('dataSourceUpload').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('uploadSection').style.display = 'block';
+                document.getElementById('manualSection').style.display = 'none';
+            }
+        });
+
+        document.getElementById('dataSourceManual').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('manualSection').style.display = 'block';
+            }
+        });
+
+        // Adicionar linha na entrada manual
+        document.getElementById('addRowBtn').addEventListener('click', function() {
+            const tbody = document.querySelector('#manualEntryTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <select class="form-select form-select-sm">
+                        <option value="Melhoria">Melhoria</option>
+                        <option value="Correção">Correção</option>
+                        <option value="Nova Funcionalidade">Nova Funcionalidade</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Ex: PROJ-123"></td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Ex: Frontend"></td>
+                <td><textarea class="form-control form-control-sm" rows="2" placeholder="Texto da issue para gerar o changelog"></textarea></td>
+                <td>
+                    <button class="btn btn-danger btn-sm remove-row">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+
+            // Adicionar evento para remover linha
+            newRow.querySelector('.remove-row').addEventListener('click', function() {
+                this.closest('tr').remove();
+            });
+        });
+
+        // Adicionar evento para remover linha (para linhas existentes) - Executa no carregamento
+         document.querySelectorAll('.remove-row').forEach(button => {
+             button.addEventListener('click', function() {
+                 this.closest('tr').remove();
+             });
+         });
+
+
+        // Download de template CSV
+        document.getElementById('downloadTemplateBtn').addEventListener('click', function() {
+            const csvContent = "Tipo de item,Chave da item,Campo personalizado (Module),Resumo\n" +
+                              "Melhoria,PROJ-123,Frontend,Implementação de novo filtro na tela de listagem\n" +
+                              "Correção,PROJ-124,Backend,Correção do bug que impedia o login de usuários externos";
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'template_changelog.csv';
+            link.click();
+        });
+
+        // Processar upload de CSV
+        document.getElementById('csvFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            Papa.parse(file, {
+                header: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 0) {
+                        // Mapear os campos do CSV para o formato interno
+                        issuesData = results.data
+                            .filter(row => row['Chave da item'] && row['Chave da item'].trim() !== '')
+                            .map(row => ({
+                                tipo: row['Tipo de item'] || '',
+                                key: row['Chave da item'] || '',
+                                modulo: row['Campo personalizado (Module)'] || '',
+                                resumo: row['Resumo'] || ''
+                            }));
+
+                        showAlert(`${issuesData.length} issues carregadas com sucesso!`, 'success');
+                         // Limpar textos gerados anteriormente ao carregar novos dados
+                         generatedTexts = {};
+                         renderIssuesTable(); // Renderiza a tabela na Etapa 2 para refletir os novos dados
+
+                    } else {
+                        showAlert('O arquivo CSV não contém dados válidos ou as colunas esperadas.', 'danger');
+                         issuesData = []; // Limpa os dados anteriores em caso de erro
+                         generatedTexts = {};
+                         renderIssuesTable();
+                    }
+                },
+                error: function(error) {
+                    showAlert(`Erro ao processar o arquivo CSV: ${error.message}`, 'danger');
+                     issuesData = []; // Limpa os dados anteriores em caso de erro
+                     generatedTexts = {};
+                     renderIssuesTable();
+                }
+            });
+        });
+
+        // Coletar dados da entrada manual
+        function collectManualData() {
+            const rows = document.querySelectorAll('#manualEntryTable tbody tr');
+            const data = [];
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const key = cells[1].querySelector('input').value.trim();
+
+                if (key) {
+                    data.push({
+                        tipo: cells[0].querySelector('select').value,
+                        key: key,
+                        modulo: cells[2].querySelector('input').value,
+                        resumo: cells[3].querySelector('textarea').value
+                    });
+                }
+            });
+
+            return data;
+        }
+
+        // Botão para ir para a etapa 2
+        document.getElementById('goToStep2Btn').addEventListener('click', function() {
+            if (document.getElementById('dataSourceManual').checked) {
+                issuesData = collectManualData();
+                 // Limpar textos gerados anteriormente ao carregar novos dados
+                 generatedTexts = {};
+            }
+
+            if (issuesData.length === 0) {
+                showAlert('Por favor, carregue dados de issues ou adicione-os manualmente antes de continuar.', 'warning');
+                return;
+            }
+
+            goToStep(2);
+        });
+
+        // Renderizar tabela de issues (Etapa 2)
+        function renderIssuesTable() {
+            const tbody = document.querySelector('#issuesTable tbody');
+            tbody.innerHTML = '';
+
+            if (issuesData.length === 0) {
+                 tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum dado de issue carregado.</td></tr>';
+                 return;
+            }
+
+            issuesData.forEach(issue => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${issue.tipo || 'Não especificado'}</td>
+                    <td>${issue.key}</td>
+                    <td>${issue.modulo || 'Geral'}</td>
+                    <td>${issue.resumo || 'Sem resumo'}</td>
+                    <td>
+                        ${generatedTexts[issue.key] ?
+                            '<span class="badge bg-success">Gerado</span>' :
+                            `<button class="btn btn-sm btn-outline-primary generate-btn" data-key="${issue.key}">
+                                Gerar
+                            </button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Adicionar eventos para botões de geração
+            document.querySelectorAll('.generate-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const key = this.getAttribute('data-key');
+                    generateChangelogText(key);
+                });
+            });
+        }
+
+        // Gerar texto de changelog para uma issue (AGORA USA GEMINI DIRETAMENTE)
+        async function generateChangelogText(key) {
+            const issue = issuesData.find(i => i.key === key);
+            if (!issue) {
+                console.error(`Issue com chave ${key} não encontrada.`);
+                return;
+            }
+
+            const button = document.querySelector(`.generate-btn[data-key="${issue.key}"]`);
+            if (button) {
+                button.innerHTML = '<span class="loading-spinner"></span> Gerando...';
+                button.disabled = true;
+            }
+
+            const apiKey = document.getElementById('geminiApiKey').value.trim(); // Pega a chave do Gemini
+            const instructions = document.getElementById('aiInstructions').value.trim();
+
+            if (!apiKey) {
+                showAlert('Por favor, insira uma chave de API válida na Etapa 1.', 'danger');
+                if (button) {
+                    button.innerHTML = 'Gerar';
+                    button.disabled = false;
+                }
+                return;
+            }
+
+            const promptText = `
+                ${instructions}
+
+                Tipo: ${issue.tipo || 'Melhoria/Correção'}
+                Módulo: ${issue.modulo || 'Geral'}
+                Descrição: ${issue.resumo || 'Sem resumo'}
+            `;
+
+            // >>> CHAMADA DIRETA PARA A API DO GOOGLE GEMINI <<<
+            // A chave da API vai na URL para o Gemini
+            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey; // Alterado para gemini-1.5-flash
+
+            const payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            { "text": promptText }
+                        ]
+                    }
+                ],
+                "generationConfig": {
+                    "maxOutputTokens": 500, // Limite de tokens para a resposta da IA
+                    "temperature": 0.7, // Ajuste para mais ou menos criatividade
+                },
+            };
+
+            try {
+                console.log(`Chamando API do Google Gemini para issue ${issue.key}`);
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    let errorText = await response.text();
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        // A API Gemini tem a mensagem de erro em error.message se for um erro JSON
+                        errorText = errorJson.error.message || errorText;
+                    } catch (e) { /* ignore */ }
+                    console.error(`Erro recebido da API Gemini para issue ${issue.key}: Status ${response.status}`, errorText);
+                    throw new Error(`Erro da API Gemini (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+
+                // Verifique a estrutura da resposta da API Gemini
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
+                     console.error(`Resposta inválida da API Gemini para issue ${issue.key}:`, data);
+                     throw new Error(`Resposta inválida da API Gemini`);
+                }
+
+                const generatedText = data.candidates[0].content.parts[0].text.trim();
+
+                // Armazenar o texto gerado
+                generatedTexts[issue.key] = generatedText;
+
+                // Atualizar a interface da tabela na Etapa 2
+                const statusCell = button ? button.parentElement : document.querySelector(`#issuesTable tbody tr button[data-key="${issue.key}"]`)?.parentElement;
+                if (statusCell) {
+                    statusCell.innerHTML = '<span class="badge bg-success">Gerado</span>';
+                }
+
+            } catch (error) {
+                console.error(`Erro ao gerar texto via API Gemini para issue ${issue.key}:`, error);
+                const button = document.querySelector(`.generate-btn[data-key="${issue.key}"]`);
+                if (button) {
+                    button.innerHTML = 'Gerar';
+                    button.disabled = false;
+                }
+
+                // Atualizar interface com status de erro
+                const statusCell = button ? button.parentElement : document.querySelector(`#issuesTable tbody tr button[data-key="${issue.key}"]`)?.parentElement;
+                if (statusCell && statusCell.tagName === 'TD') {
+                    statusCell.innerHTML = `<span class="badge bg-danger" title="${error.message}">Erro</span>`;
+                }
+
+                showAlert(`Erro ao gerar texto para ${issue.key}: ${error.message}`, 'danger');
+                throw error;
+            }
+        }
+
+        // Gerar todos os textos
+        document.getElementById('generateAllBtn').addEventListener('click', async function() {
+            const pendingIssues = issuesData.filter(issue => !generatedTexts[issue.key]);
+
+            if (pendingIssues.length === 0) {
+                showAlert('Todos os textos já foram gerados!', 'info');
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<span class="loading-spinner"></span> Gerando...';
+
+            updateProgressBar(0, true);
+
+            let generatedCount = 0;
+            let errorCount = 0;
+
+            for (let i = 0; i < pendingIssues.length; i++) {
+                const issue = pendingIssues[i];
+                try {
+                    await generateChangelogText(issue.key);
+                    generatedCount++;
+                } catch (error) {
+                    errorCount++;
+                    // O erro já é mostrado individualmente pela generateChangelogText
+                }
+
+                // Atualizar progresso
+                const progress = Math.round(((i + 1) / pendingIssues.length) * 100);
+                updateProgressBar(progress);
+            }
+
+            if (errorCount === 0) {
+                 showAlert('Todos os textos pendentes foram gerados com sucesso!', 'success');
+            } else if (generatedCount > 0) {
+                 showAlert(`Geração concluída com ${generatedCount} textos gerados e ${errorCount} erros.`, 'warning');
+            } else {
+                 showAlert(`Falha na geração de todos os textos (${errorCount} erros). Verifique a chave da API.`, 'danger');
+            }
+
+
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-magic"></i> Gerar Todos os Textos';
+            updateProgressBar(100, false); // Esconde a barra ao finalizar
+            renderIssuesTable(); // Atualiza a tabela final (embora generateChangelogText já atualize individualmente)
+
+        });
+
+        // Botões de navegação
+        document.getElementById('backToStep1Btn').addEventListener('click', () => goToStep(1));
+        document.getElementById('goToStep3Btn').addEventListener('click', () => goToStep(3));
+        document.getElementById('backToStep2Btn').addEventListener('click', () => goToStep(2));
+        document.getElementById('goToStep4Btn').addEventListener('click', () => goToStep(4));
+        document.getElementById('backToStep3Btn').addEventListener('click', () => goToStep(3));
+
+        // Renderizar tabela de revisão (Etapa 3)
+        function renderReviewTable() {
+            const tbody = document.querySelector('#reviewTable tbody');
+            tbody.innerHTML = '';
+
+             const issuesWithText = issuesData.filter(issue => generatedTexts[issue.key]);
+
+             if (issuesWithText.length === 0) {
+                  tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum texto de changelog gerado ainda.</td></tr>';
+                  return;
+             }
+
+
+            issuesWithText.forEach(issue => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${issue.tipo || 'Não especificado'}</td>
+                    <td>${issue.key}</td>
+                    <td>${issue.modulo || 'Geral'}</td>
+                    <td>
+                        <div class="editable-cell" contenteditable="true" data-key="${issue.key}">
+                            ${generatedTexts[issue.key]}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Adicionar eventos para células editáveis
+            document.querySelectorAll('.editable-cell').forEach(cell => {
+                cell.addEventListener('blur', function() {
+                    const key = this.getAttribute('data-key');
+                    generatedTexts[key] = this.innerText.trim();
+                    // showAlert('Texto da issue ' + key + ' atualizado.', 'info'); // Feedback de salvamento individual pode ser demais
+                });
+            });
+        }
+
+        // Salvar revisão
+        document.getElementById('saveReviewBtn').addEventListener('click', function() {
+            // Atualizar textos com as edições (já feito pelo evento 'blur' das células, mas pode forçar aqui também)
+            document.querySelectorAll('.editable-cell').forEach(cell => {
+                const key = cell.getAttribute('data-key');
+                generatedTexts[key] = cell.innerText.trim();
+            });
+
+            // Preparar dados para CSV (incluindo as issues que não geraram texto, mas sem o texto gerado)
+            const csvData = issuesData.map(issue => {
+                return {
+                    "Tipo de item": issue.tipo || '',
+                    "Chave da item": issue.key || '',
+                    "Campo personalizado (Module)": issue.modulo || '',
+                    "Resumo": issue.resumo || '',
+                    "Texto do Changelog": generatedTexts[issue.key] || '' // Inclui texto gerado ou vazio
+                };
+            });
+
+            // Converter para CSV
+            const csv = Papa.unparse(csvData);
+
+            // Criar e baixar arquivo
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'changelog_revisado_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.csv'; // Nome do arquivo com data formatada
+            link.click();
+
+            showAlert('Revisão salva e arquivo CSV baixado com sucesso!', 'success');
+        });
+
+        // Renderizar prévia do documento (Etapa 4)
+        function renderDocumentPreview() {
+            // Preencher valores padrão se estiverem vazios
+            if (!document.getElementById('version').value) {
+                document.getElementById('version').value = 'X.Y.Z';
+            }
+            if (!document.getElementById('documentTitle').value) {
+                const version = document.getElementById('version').value;
+                document.getElementById('documentTitle').value = `Release Notes - Versão ${version} - ${new Date().toLocaleDateString()}`;
+            }
+
+            if (!document.getElementById('documentIntro').value) {
+                const version = document.getElementById('version').value;
+                document.getElementById('documentIntro').value = `Este documento apresenta as principais mudanças, correções e melhorias implementadas na versão ${version} do sistema.`;
+            }
+
+            // Gerar prévia
+            generateDocumentPreview();
+        }
+
+        // Atualizar prévia quando os campos mudarem
+        document.getElementById('documentTitle').addEventListener('input', generateDocumentPreview);
+        document.getElementById('documentIntro').addEventListener('input', generateDocumentPreview);
+         document.getElementById('version').addEventListener('input', generateDocumentPreview); // Atualiza o título e intro padrão se mudar a versão
+
+        // Gerar prévia do documento
+        function generateDocumentPreview() {
+            const title = document.getElementById('documentTitle').value;
+            const intro = document.getElementById('documentIntro').value;
+
+            // Agrupar por tipo e módulo
+            const groupedByType = {};
+
+            issuesData.forEach(issue => {
+                 // Inclui apenas issues que tiveram texto gerado/revisado
+                if (generatedTexts[issue.key] && generatedTexts[issue.key].trim() !== '') {
+                    if (!groupedByType[issue.tipo]) {
+                        groupedByType[issue.tipo] = {};
+                    }
+
+                    const modulo = issue.modulo || 'Geral'; // Agrupa 'Módulo Vazio' como 'Geral'
+                    if (!groupedByType[issue.tipo][modulo]) {
+                        groupedByType[issue.tipo][modulo] = [];
+                    }
+
+                    groupedByType[issue.tipo][modulo].push({
+                        key: issue.key,
+                        text: generatedTexts[issue.key]
+                    });
+                }
+            });
+
+            // Ordenar tipos (opcional, pode adicionar uma ordem específica se desejar)
+            const orderedTypes = ['Nova Funcionalidade', 'Melhoria', 'Correção']; // Exemplo de ordem
+            const types = Object.keys(groupedByType).sort((a, b) => {
+                 const indexA = orderedTypes.indexOf(a);
+                 const indexB = orderedTypes.indexOf(b);
+                 if (indexA === -1 && indexB === -1) return a.localeCompare(b); // Se ambos não estão na lista, ordena alfabeticamente
+                 if (indexA === -1) return 1; // Coloca tipos não listados no final
+                 if (indexB === -1) return -1;
+                 return indexA - indexB; // Ordena pela lista
+            });
+
+
+            // Gerar HTML para prévia
+            let html = `
+                <h1>${escapeHTML(title)}</h1>
+                <p>${escapeHTML(intro).replace(/\n/g, '<br>')}</p> `;
+
+             if (types.length === 0) {
+                  html += '<p class="text-center">Nenhum item com texto de changelog gerado para mostrar na prévia.</p>';
+             } else {
+                // Adicionar seções por tipo
+                types.forEach(tipo => {
+                     html += `<h2>${escapeHTML(tipo)}</h2>`;
+
+                    // Ordenar módulos (opcional, pode adicionar ordem específica)
+                     const modulos = Object.keys(groupedByType[tipo]).sort(); // Ordena módulos alfabeticamente
+
+
+                    // Adicionar subseções por módulo
+                    modulos.forEach(modulo => {
+                         html += `<h3>${escapeHTML(modulo)}</h3>`;
+                         html += '<ul>';
+
+                        // Adicionar itens (opcional, pode ordenar por key ou outro critério)
+                        groupedByType[tipo][modulo].forEach(item => {
+                             html += `<li>${escapeHTML(item.text)} <em>(${escapeHTML(item.key)})</em></li>`;
+                        });
+
+                         html += '</ul>';
+                    });
+                });
+             }
+
+
+            // Atualizar prévia
+            document.getElementById('previewContent').innerHTML = html;
+        }
+
+         // Helper para escapar HTML (evitar XSS na prévia)
+         function escapeHTML(str) {
+             const div = document.createElement('div');
+             div.appendChild(document.createTextNode(str));
+             return div.innerHTML;
+         }
+
+
+        // Exportar HTML
+        document.getElementById('exportHtmlBtn').addEventListener('click', function() {
+            const title = document.getElementById('documentTitle').value;
+            const content = document.getElementById('previewContent').innerHTML;
+            const version = document.getElementById('version').value || 'release';
+
+            // Criar documento HTML completo
+            const htmlDocument = '<!DOCTYPE html>\n' +
+                '<html lang="pt-BR">\n' +
+                '<head>\n' +
+                '    <meta charset="UTF-8">\n' +
+                '    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+                '    <title>' + escapeHTML(title) + '</title>\n' +
+                '    <style>\n' +
+                '        body {\n' +
+                '            font-family: Arial, sans-serif;\n' +
+                '            line-height: 1.6;\n' +
+                '            max-width: 800px;\n' +
+                '            margin: 0 auto;\n' +
+                '            padding: 20px;\n' +
+                '        }\n' +
+                '        h1 {\n' +
+                '            text-align: center;\n' +
+                '            color: #333;\n' +
+                '            border-bottom: 1px solid #ddd;\n' +
+                '            padding-bottom: 10px;\n' +
+                '        }\n' +
+                '        h2 {\n' +
+                '            color: #2c3e50;\n' +
+                '            margin-top: 30px;\n' +
+                '        }\n' +
+                '        h3 {\n' +
+                '            color: #3498db;\n' +
+                '        }\n' +
+                '        ul {\n' +
+                '            margin-bottom: 20px;\n' +
+                '        }\n' +
+                '        li {\n' +
+                '            margin-bottom: 8px;\n' +
+                '        }\n' +
+                '        em {\n' +
+                '            color: #7f8c8d;\n' +
+                '            font-size: 0.9em;\n' +
+                '        }\n' +
+                 '        .text-center { text-align: center; } /* Garante que a mensagem de "nenhum item" seja centralizada no export */ \n' +
+                '    </style>\n' +
+                '</head>\n' +
+                '<body>\n' +
+                content + '\n' + // O conteúdo já está em HTML gerado pela generateDocumentPreview
+                '</body>\n' +
+                '</html>';
+
+            const blob = new Blob([htmlDocument], { type: 'text/html;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'changelog_' + version.replace(/[^\w.-]/g, '') + '.html'; // Nome do arquivo mais seguro
+            link.click();
+
+            showAlert('Documento HTML exportado com sucesso!', 'success');
+        });
+
+        // Exportar Markdown
+        document.getElementById('exportMarkdownBtn').addEventListener('click', function() {
+            const title = document.getElementById('documentTitle').value;
+            const intro = document.getElementById('documentIntro').value;
+            const version = document.getElementById('version').value || 'release';
+
+            // Converter para Markdown
+            let markdown = `# ${title}\n\n${intro}\n\n`;
+
+            // Agrupar por tipo e módulo
+            const groupedByType = {};
+
+            issuesData.forEach(issue => {
+                 // Inclui apenas issues que tiveram texto gerado/revisado
+                if (generatedTexts[issue.key] && generatedTexts[issue.key].trim() !== '') {
+                    if (!groupedByType[issue.tipo]) {
+                        groupedByType[issue.tipo] = {};
+                    }
+
+                    const modulo = issue.modulo || 'Geral'; // Agrupa 'Módulo Vazio' como 'Geral'
+                    if (!groupedByType[issue.tipo][modulo]) {
+                        groupedByType[issue.tipo][modulo] = [];
+                    }
+
+                    groupedByType[issue.tipo][modulo].push({
+                        key: issue.key,
+                        text: generatedTexts[issue.key]
+                    });
+                }
+            });
+
+             const orderedTypes = ['Nova Funcionalidade', 'Melhoria', 'Correção']; // Exemplo de ordem
+             const types = Object.keys(groupedByType).sort((a, b) => {
+                 const indexA = orderedTypes.indexOf(a);
+                 const indexB = orderedTypes.indexOf(b);
+                 if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+                 if (indexA === -1) return 1;
+                 if (indexB === -1) return -1;
+                 return indexA - indexB;
+             });
+
+
+             if (types.length === 0) {
+                  markdown += 'Nenhum item com texto de changelog gerado.\n';
+             } else {
+                // Adicionar seções por tipo
+                types.forEach(tipo => {
+                    markdown += `## ${tipo}\n\n`;
+
+                     const modulos = Object.keys(groupedByType[tipo]).sort();
+                     modulos.forEach(modulo => {
+                        markdown += `### ${modulo}\n\n`;
+
+                        // Adicionar itens
+                        groupedByType[tipo][modulo].forEach(item => {
+                            markdown += `- ${item.text.trim()} *(${item.key})*\n`; // Adiciona trim() para evitar espaços extras
+                        });
+
+                        markdown += '\n'; // Adiciona linha extra entre módulos
+                    });
+                     markdown += '\n'; // Adiciona linha extra entre tipos
+                });
+             }
+
+
+            const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'changelog_' + version.replace(/[^\w.-]/g, '') + '.md'; // Nome do arquivo mais seguro
+            link.click();
+
+            showAlert('Documento Markdown exportado com sucesso!', 'success');
+        });
+
+         // Inicializa a tabela na Etapa 2 caso já existam dados (ex: após recarregar a página se estiver salvando estado localmente - NÃO IMPLEMENTADO NESTE CÓDIGO)
+         // renderIssuesTable(); // Pode chamar aqui se quiser que a tabela Etapa 2 seja populada ao carregar a página com dados pré-existentes
+    </script>
+</body>
+</html>

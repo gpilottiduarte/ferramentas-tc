@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lacunas TC - Versão JavaScript</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos básicos para o container e corpo (consistentes com as outras páginas) */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            animation: fadeInUp 0.6s ease-out;
+            color: #2d3748; /* Cor do texto padrão */
+            line-height: 1.6;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: #2d3748;
+            font-size: 1.4rem;
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 1em;
+        }
+
+        ul {
+            list-style-type: disc;
+            margin-bottom: 1em;
+            margin-left: 20px;
+        }
+
+        ul li {
+            margin-bottom: 0.5em;
+        }
+
+        ol {
+            list-style-type: decimal;
+            margin-bottom: 1em;
+            margin-left: 20px;
+        }
+
+        ol li {
+            margin-bottom: 0.5em;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+
+        /* Estilos para a tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2em 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden; /* Para border-radius funcionar com thead */
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #667eea;
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+
+        tr:hover {
+            background-color: #edf2f7;
+        }
+
+        /* Estilo para links de retorno, etc. */
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-link a {
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsividade da tabela */
+        @media (max-width: 600px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr {
+                border: 1px solid #ccc;
+                margin-bottom: 15px;
+                border-radius: 8px;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+            }
+            td:before {
+                position: absolute;
+                top: 6px;
+                left: 6px;
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #2d3748;
+            }
+            td:nth-of-type(1):before { content: "Aspecto"; }
+            td:nth-of-type(2):before { content: "Flask (anterior)"; }
+            td:nth-of-type(3):before { content: "JavaScript (novo)"; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lacunas TC - Versão JavaScript</h1>
+        <p>Esta é a versão JavaScript da ferramenta Lacunas TC, projetada para ser leve, rápida e fácil de usar. Ela substitui a versão anterior em Flask, oferecendo uma experiência mais fluida e sem a necessidade de um servidor backend.</p>
+
+        <h2>Funcionalidades implementadas:</h2>
+
+        <h3>1. Estrutura de dados</h3>
+        <ul>
+            <li>Carregamento do `processed_docs.json` via localStorage ou input manual</li>
+            <li>Manutenção da estrutura de embeddings e metadados dos documentos</li>
+            <li>Compatibilidade total com os dados gerados pelos seus scripts Python</li>
+        </ul>
+
+        <h3>2. Integração com a API</h3>
+        <ul>
+            <li>Integração direta com Google Gemini API (`embedding-001` e `gemini-1.5-pro-latest`)</li>
+            <li>Geração de embeddings em tempo real no frontend</li>
+            <li>Tratamento de erros e rate limiting</li>
+        </ul>
+
+        <h3>3. Algoritmos de similaridade</h3>
+        <ul>
+            <li>Implementação própria da similaridade de cosseno</li>
+            <li>Busca de documentos relevantes baseada em embeddings</li>
+            <li>Ranking por relevância percentual</li>
+        </ul>
+
+        <h3>4. Interface aprimorada</h3>
+        <ul>
+            <li>Design moderno com gradientes e animações</li>
+            <li>Indicadores visuais de status (carregamento, pronto, erro)</li>
+            <li>Configuração de API Key integrada na interface</li>
+            <li>Responsivo para diferentes dispositivos</li>
+        </ul>
+
+        <h2>Vantagens desta abordagem:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Aspecto</th>
+                    <th>Flask (anterior)</th>
+                    <th>JavaScript (novo)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Deploy</strong></td>
+                    <td>Requer servidor Python + Gunicorn</td>
+                    <td>Funciona em qualquer servidor web estático</td>
+                </tr>
+                <tr>
+                    <td><strong>Dependências</strong></td>
+                    <td>Flask, dotenv, scipy, numpy</td>
+                    <td>Apenas navegador moderno</td>
+                </tr>
+                <tr>
+                    <td><strong>Configuração</strong></td>
+                    <td>Arquivo .env, variáveis de ambiente</td>
+                    <td>Interface visual para API Key</td>
+                </tr>
+                <tr>
+                    <td><strong>Portabilidade</strong></td>
+                    <td>Limitada ao ambiente Python</td>
+                    <td>Qualquer hosting estático (GitHub Pages, Netlify, etc.)</td>
+                </tr>
+                <tr>
+                    <td><strong>Manutenção</strong></td>
+                    <td>Servidor sempre rodando</td>
+                    <td>Zero manutenção de servidor</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Para começar a usar:</h2>
+        <ol>
+            <li><strong>Salve o arquivo como `index.html`</strong></li>
+            <li><strong>Obtenha uma API Key do Google AI Studio</strong></li>
+            <li><strong>Carregue seu arquivo `processed_docs.json` existente</strong></li>
+            <li><strong>Hospede em qualquer servidor web estático</strong></li>
+        </ol>
+
+        <p>A ferramenta mantém a mesma qualidade de análise que a versão Flask, mas com muito mais simplicidade operacional. Perfeita para ambientes onde você precisa de portabilidade e facilidade de deploy, especialmente considerando seu background em documentação técnica e APIs.</p>
+
+        <div class="back-link">
+            <a href="index.html">Voltar para a ferramenta</a>
+        </div>
+    </div>
+</body>
+</html>

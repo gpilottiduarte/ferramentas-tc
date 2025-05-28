@@ -1,0 +1,328 @@
+/* leiturabilidade/styles.css */
+
+/* Importa uma fonte moderna do Google Fonts (opcional, mas recomendado) */
+/* Para usar esta fonte, você precisará adicionar <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"> ao seu index.html na seção <head> */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+    /* Definição de variáveis CSS para cores e espaçamento */
+    --primary-color: #007bff; /* Azul vibrante */
+    --secondary-color: #6c757d; /* Cinza suave */
+    --accent-color: #28a745; /* Verde para destaque/sucesso */
+    --background-light: #f4f7f6; /* Fundo muito claro */
+    --surface-white: #ffffff; /* Superfície branca */
+    --border-color: #e0e0e0; /* Borda suave */
+    --text-dark: #343a40; /* Texto escuro */
+    --text-medium: #555; /* Texto médio */
+    --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08); /* Sombra mais difundida */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    --border-radius: 8px;
+}
+
+body {
+    font-family: 'Poppins', sans-serif; /* Usando a fonte Poppins */
+    margin: 0;
+    padding: var(--spacing-lg); /* Espaçamento global com variável */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Alinha no topo */
+    min-height: 100vh;
+    background-color: var(--background-light); /* Fundo claro e moderno */
+    color: var(--text-dark); /* Cor de texto padrão */
+    line-height: 1.6; /* Melhor legibilidade */
+}
+
+.container {
+    width: 95%;
+    max-width: 1000px;
+    background-color: var(--surface-white);
+    padding: var(--spacing-xl); /* Mais padding interno */
+    box-shadow: var(--shadow-light); /* Sombra suave */
+    border-radius: var(--border-radius); /* Cantos arredondados */
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    font-size: 2.8rem; /* Usando rem para responsividade */
+    color: var(--primary-color); /* Título com cor primária */
+    font-weight: 700; /* Mais peso */
+    letter-spacing: -0.03em; /* Ajuste para melhor leitura */
+}
+
+h2 {
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-sm);
+    font-size: 2rem;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--border-color); /* Linha de separação mais fina */
+    padding-bottom: var(--spacing-xs);
+    font-weight: 600;
+}
+
+h3 {
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-xs);
+    font-size: 1.5rem;
+    color: var(--text-medium);
+    font-weight: 600;
+}
+
+#fileInput {
+    display: block;
+    margin: 0 auto var(--spacing-xl);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--surface-white);
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-dark);
+    width: fit-content; /* Ajusta largura ao conteúdo */
+    transition: all 0.3s ease; /* Transição suave */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+}
+
+#fileInput:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para o seletor de idioma */
+.language-selector {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.1rem;
+    color: var(--text-medium);
+}
+
+.language-selector label {
+    margin-right: var(--spacing-xs);
+    font-weight: 600;
+}
+
+.language-selector select {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--surface-white);
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none; /* Remove estilo padrão em navegadores Webkit */
+    -moz-appearance: none;    /* Remove estilo padrão em navegadores Mozilla */
+    appearance: none;         /* Remove estilo padrão */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292%22%20height%3D%22292%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-5.4H18.2c-4.1%200-7.9%201.4-10.9%204.2-3.1%202.8-4.7%206.6-4.7%2010.7s1.5%207.9%204.7%2010.7l116.1%20115.9c3.1%202.8%206.8%204.2%2010.9%204.2s7.8-1.4%2010.9-4.2l116.1-115.9c3.1-2.8%204.7-6.6%204.7-10.7s-1.5-7.9-4.7-10.7z%22%2F%3E%3C%2Fsvg%3E'); /* Seta customizada */
+    background-repeat: no-repeat;
+    background-position: right 0.7em top 50%, 0 0;
+    background-size: 0.65em auto, 100%;
+}
+
+.language-selector select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+
+.results-area, .report-area {
+    margin-top: var(--spacing-xl);
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.result-card {
+    background-color: var(--surface-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+.result-card h3 {
+    font-size: 1.1rem;
+    color: var(--text-medium);
+    margin-top: 0;
+    margin-bottom: var(--spacing-xs);
+    font-weight: 600;
+}
+
+.result-card .score {
+    font-size: 2.5rem; /* Pontuação maior */
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-xs);
+}
+
+.result-card .description {
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.result-card.wide {
+    grid-column: span 2;
+}
+
+/* Estilos para as seções do relatório */
+.report-section {
+    background-color: var(--surface-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+}
+
+.report-section p {
+    line-height: 1.7;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-xs);
+}
+
+.report-section ul {
+    list-style-type: '👉 '; /* Ícone personalizado para lista */
+    padding-left: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.report-section ul li {
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.report-section strong {
+    color: var(--primary-color);
+}
+
+
+/* Mensagens de erro e aviso */
+.error-message {
+    color: #dc3545; /* Vermelho mais vibrante */
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.warning-message {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-lg);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.warning-message strong {
+    color: #6a5000;
+}
+
+/* Estilos para o gráfico de frequência */
+#wordFrequencyChart {
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    max-width: 100%;
+    height: 380px; /* Altura ligeiramente maior */
+}
+
+/* Media Queries (ajustados para rem e variáveis) */
+@media (max-width: 768px) {
+    .container {
+        padding: var(--spacing-lg);
+    }
+
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    h2 {
+        font-size: 1.7rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+
+    .results-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .result-card.wide {
+        grid-column: span 1;
+    }
+
+    .result-card .score {
+        font-size: 2rem;
+    }
+
+    .report-section ul {
+        padding-left: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: var(--spacing-md);
+    }
+
+    .container {
+        padding: var(--spacing-md);
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.1rem;
+    }
+
+    #fileInput {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9rem;
+    }
+
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .result-card.wide {
+        grid-column: span 1;
+    }
+
+    .result-card .score {
+        font-size: 1.8rem;
+    }
+
+    .report-section ul {
+        padding-left: var(--spacing-md);
+    }
+}
