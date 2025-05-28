@@ -1,0 +1,202 @@
+/* Variáveis CSS */
+:root {
+    --primary-color: #14532d;
+    --secondary-color: #166534;
+    --light-color: #e6f4ea;
+    --dark-color: #052e16;
+    --success-color: #22c55e;
+    --card-shadow: 0 4px 6px rgba(20, 83, 45, 0.08), 0 1px 3px rgba(20, 83, 45, 0.06);
+    --transition: all 0.3s ease;
+}
+/* Reset básico e fontes */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+body {
+    background-color: var(--light-color);
+    color: #1a2e22;
+    line-height: 1.6;
+}
+/* Estilos do cabeçalho */
+.header {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    text-align: center;
+    padding: 3rem 1rem 6rem;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23e6f4ea' fill-opacity='1' d='M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    z-index: 1;
+}
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+.header p {
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0.9;
+}
+/* Contêiner principal */
+.container {
+    max-width: 1200px;
+    margin: -4rem auto 2rem;
+    padding: 0 1rem;
+    position: relative;
+    z-index: 2;
+}
+/* Grid de ferramentas */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+/* Media queries para responsividade */
+@media (max-width: 1200px) {
+    .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Estilos dos cartões de ferramenta */
+.tool-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(20, 83, 45, 0.13), 0 4px 8px rgba(20, 83, 45, 0.09);
+}
+.tool-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+.tool-icon.blue {
+    background-color: #d1fae5;
+    color: var(--primary-color);
+}
+.tool-icon.purple {
+    background-color: #bbf7d0;
+    color: #166534;
+}
+.tool-icon.cyan {
+    background-color: #a7f3d0;
+    color: #059669;
+}
+.tool-content {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+.tool-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark-color);
+}
+.tool-description {
+    color: #22543d;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+.feature-list {
+    list-style: none;
+    margin-bottom: 1.5rem;
+}
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+.feature-icon {
+    color: var(--success-color);
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+.tool-button {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+.tool-button:hover {
+    background-color: var(--secondary-color);
+}
+.tool-button.blue {
+    background-color: var(--primary-color);
+}
+.tool-button.blue:hover {
+    background-color: var(--secondary-color);
+}
+.tool-button.purple {
+    background-color: #22c55e;
+    color: #052e16;
+}
+.tool-button.purple:hover {
+    background-color: #16a34a;
+    color: #fff;
+}
+.tool-button.cyan {
+    background-color: #059669;
+}
+.tool-button.cyan:hover {
+    background-color: #065f46;
+}
+/* Estilos do rodapé */
+.footer {
+    text-align: center;
+    padding: 2rem;
+    color: #22543d;
+    font-size: 0.9rem;
+}
+/* Ajustes de responsividade para o cabeçalho em telas menores */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    .container {
+        margin-top: -2rem;
+    }
+}
