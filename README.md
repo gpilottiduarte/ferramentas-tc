@@ -27,7 +27,7 @@ O objetivo deste repositório é centralizar utilitários e automações que aux
 1. Clone este repositório:
 
     ```bash
-    git clone https://github.com/seu-usuario/ferramentas-tc.git
+    git clone https://github.com/gpilottiduarte/ferramentas-tc.git
     ```
 2. Navegue até a pasta do projeto:
 
