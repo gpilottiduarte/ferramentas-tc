@@ -6,137 +6,81 @@
     <title>Sobre a ferramenta de análise de cobertura da documentação - Segura - 2025</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Reutilizando os estilos básicos do container e corpo do index.html */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+    /* Estilo profissional e minimalista */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        max-width: 800px;
+        width: 100%;
+        padding: 32px;
+        animation: fadeInUp 0.4s ease-out;
+        color: #333;
+        line-height: 1.6;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        text-align: center;
+        color: #2d3748;
+    }
+    h2, h3 {
+        color: #2d3748;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-weight: 600;
+    }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    p, li { margin-bottom: 1em; color: #555; }
+    ul, ol { margin-left: 20px; }
+    a {
+        color: #2d3748;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    a:hover { text-decoration: underline; }
+    .highlight-box {
+        background-color: #fafafa;
+        border-left: 4px solid #48bb78;
+        padding: 12px 16px;
+        margin-bottom: 1.5em;
+        border-radius: 4px;
+    }
+    center a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #2d3748;
+        color: #fff;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+    }
+    center a:hover { background-color: #1a202c; }
+    @media (max-width: 600px) {
+        .container { padding: 20px; }
+        h1 { font-size: 1.75rem; }
+    }
+</style>
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            max-width: 900px;
-            width: 100%;
-            animation: fadeInUp 0.6s ease-out;
-            color: #2d3748; /* Cor do texto padrão */
-            line-height: 1.6;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h1 {
-            color: #2d3748;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        h2, h3 {
-            color: #2d3748;
-            margin-top: 1.5em;
-            margin-bottom: 0.8em;
-            font-weight: 700;
-        }
-
-        h2 { font-size: 1.8rem; }
-        h3 { font-size: 1.4rem; }
-
-        p {
-            margin-bottom: 1em;
-        }
-
-        ul, ol {
-            margin-bottom: 1em;
-            margin-left: 20px;
-        }
-
-        ul li {
-            list-style-type: disc;
-            margin-bottom: 0.5em;
-        }
-
-        ol li {
-            list-style-type: decimal;
-            margin-bottom: 0.5em;
-        }
-
-        strong {
-            font-weight: bold;
-        }
-
-        .highlight-box {
-            background: #e6fffa;
-            border-left: 5px solid #38b2ac;
-            padding: 15px 20px;
-            margin-bottom: 1.5em;
-            border-radius: 8px;
-            color: #2d3748;
-        }
-
-        .highlight-box ul {
-            margin-top: 10px;
-            margin-bottom: 0;
-        }
-
-        a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        center a {
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            display: inline-block;
-            margin-top: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        center a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            text-decoration: none;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="container">

@@ -5,198 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lacunas TC - Versão JavaScript</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* Estilos básicos para o container e corpo (consistentes com as outras páginas) */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+  <style>
+    /* Estilo profissional e minimalista */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+    .container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        max-width: 800px;
+        width: 100%;
+        padding: 32px;
+        animation: fadeInUp 0.4s ease-out;
+        color: #333;
+        line-height: 1.6;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        text-align: center;
+        color: #2d3748;
+    }
+    h2, h3 {
+        color: #2d3748;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        font-weight: 600;
+    }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    p, li { margin-bottom: 1em; color: #555; }
+    ul, ol { margin-left: 20px; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5em 0;
+    }
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+    th {
+        background-color: #2d3748;
+        color: #fff;
+        font-weight: 600;
+    }
+    tr:nth-child(even) { background-color: #fafafa; }
+    tr:hover { background-color: #f4f4f4; }
+    .back-link {
+        text-align: center;
+        margin-top: 24px;
+    }
+    .back-link a {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #2d3748;
+        color: #fff;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+    }
+    .back-link a:hover { background-color: #1a202c; }
+    @media (max-width: 600px) {
+        .container { padding: 20px; }
+        h1 { font-size: 1.75rem; }
+        table, thead, tbody, th, td, tr { display: block; }
+        thead tr { position: absolute; top: -9999px; left: -9999px; }
+        tr { margin-bottom: 16px; }
+        td {
+            position: relative;
+            padding-left: 50%;
+            text-align: right;
         }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            max-width: 900px;
-            width: 100%;
-            animation: fadeInUp 0.6s ease-out;
-            color: #2d3748; /* Cor do texto padrão */
-            line-height: 1.6;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h1 {
+        td:before {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 45%;
+            white-space: nowrap;
+            font-weight: 600;
             color: #2d3748;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-align: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
+        td:nth-of-type(1):before { content: "Aspecto"; }
+        td:nth-of-type(2):before { content: "Flask (antigo)"; }
+        td:nth-of-type(3):before { content: "JavaScript (novo)"; }
+    }
+</style>
 
-        h2 {
-            color: #2d3748;
-            font-size: 1.8rem;
-            margin-top: 1.5em;
-            margin-bottom: 0.8em;
-            font-weight: 700;
-        }
-
-        h3 {
-            color: #2d3748;
-            font-size: 1.4rem;
-            margin-top: 1.2em;
-            margin-bottom: 0.6em;
-            font-weight: 700;
-        }
-
-        p {
-            margin-bottom: 1em;
-        }
-
-        ul {
-            list-style-type: disc;
-            margin-bottom: 1em;
-            margin-left: 20px;
-        }
-
-        ul li {
-            margin-bottom: 0.5em;
-        }
-
-        ol {
-            list-style-type: decimal;
-            margin-bottom: 1em;
-            margin-left: 20px;
-        }
-
-        ol li {
-            margin-bottom: 0.5em;
-        }
-
-        strong {
-            font-weight: bold;
-        }
-
-        /* Estilos para a tabela */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2em 0;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
-            overflow: hidden; /* Para border-radius funcionar com thead */
-        }
-
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background-color: #667eea;
-            color: white;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f7fafc;
-        }
-
-        tr:hover {
-            background-color: #edf2f7;
-        }
-
-        /* Estilo para links de retorno, etc. */
-        .back-link {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .back-link a {
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            display: inline-block;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .back-link a:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Responsividade da tabela */
-        @media (max-width: 600px) {
-            table, thead, tbody, th, td, tr {
-                display: block;
-            }
-            thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            tr {
-                border: 1px solid #ccc;
-                margin-bottom: 15px;
-                border-radius: 8px;
-            }
-            td {
-                border: none;
-                border-bottom: 1px solid #eee;
-                position: relative;
-                padding-left: 50%;
-                text-align: right;
-            }
-            td:before {
-                position: absolute;
-                top: 6px;
-                left: 6px;
-                width: 45%;
-                padding-right: 10px;
-                white-space: nowrap;
-                text-align: left;
-                font-weight: bold;
-                color: #2d3748;
-            }
-            td:nth-of-type(1):before { content: "Aspecto"; }
-            td:nth-of-type(2):before { content: "Flask (anterior)"; }
-            td:nth-of-type(3):before { content: "JavaScript (novo)"; }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
 </head>
 <body>
     <div class="container">
