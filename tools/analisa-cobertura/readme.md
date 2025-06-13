@@ -1,44 +1,74 @@
-# Lacunas TC - Versão JavaScript
-Esta é a versão JavaScript da ferramenta Lacunas TC, projetada para ser leve, rápida e fácil de usar. Ela substitui a versão anterior em Flask, oferecendo uma experiência mais fluida e sem a necessidade de um servidor backend.
+# Ferramenta de Análise de Cobertura da Documentação
 
-## **Funcionalidades Implementadas:**
+## Visão Geral
+Esta aplicação web permite identificar lacunas na documentação técnica de um projeto, utilizando embeddings, Web Workers e integração com a API da OpenAI. O usuário pode analisar textos, escolher o modelo de IA, visualizar e baixar relatórios em Markdown.
 
-### **1. Estrutura de Dados**
-- Carregamento do `processed_docs.json` via localStorage ou input manual
-- Manutenção da estrutura de embeddings e metadados dos documentos
-- Compatibilidade total com os dados gerados pelos seus scripts Python
+## Funcionalidades
+- **Análise de Cobertura:** Insira um texto/tópico e obtenha um relatório sobre a cobertura na documentação.
+- **Seleção de Modelo:** Escolha entre modelo fine-tuned ou modelo padrão da OpenAI via menu suspenso.
+- **Relatório em Markdown:** Visualize o relatório na interface e baixe em formato `.md`.
+- **Web Worker:** Processamento assíncrono para não travar a interface.
+- **Cache Cliente:** Utiliza IndexedDB para evitar downloads repetidos de embeddings.
+- **Progresso Visual:** Barra de progresso e status durante o carregamento dos embeddings.
 
-### **2. API Integration**
-- Integração direta com Google Gemini API (embedding-001 e gemini-1.5-pro-latest)
-- Geração de embeddings em tempo real no frontend
-- Tratamento de erros e rate limiting
+## Como Usar
+1. **Acesse a página `index.html`** em um navegador moderno.
+2. **Cole o texto** a ser analisado no campo indicado.
+3. **Selecione o modelo** desejado no menu suspenso.
+4. Clique em **Analisar** para gerar o relatório.
+5. O resultado será exibido na tela. Para salvar, clique em **Baixar Relatório (MD)**.
 
-### **3. Algoritmos de Similaridade**
-- Implementação própria da similaridade de cosseno
-- Busca de documentos relevantes baseada em embeddings
-- Ranking por relevância percentual
+## Estrutura dos Arquivos
+- `index.html`: Interface principal e scripts de interação.
+- `style.css`: Estilos visuais responsivos e modernos.
+- `worker.js`: Web Worker para processamento de embeddings e análise.
+- `embeddings.js`: Funções para obtenção de embeddings via API.
+- `chat.js`: Funções para interação com o modelo de chat da OpenAI.
+- `processed_docs.json`: Base de documentos e embeddings (carregado via fetch).
 
-### **4. Interface Aprimorada**
-- Design moderno com gradientes e animações
-- Indicadores visuais de status (carregamento, pronto, erro)
-- Configuração de API Key integrada na interface
-- Responsivo para diferentes dispositivos
+## Tecnologias Utilizadas
+- **HTML5, CSS3, JavaScript (ES6+)**
+- **Web Workers** para processamento paralelo
+- **API OpenAI** para embeddings e chat
+- **IndexedDB** para cache local
+- **Nginx** (opcional) para servir arquivos estáticos com compressão e cache
 
-## **Vantagens desta abordagem:**
+## Instalação e Execução
+1. Clone o repositório ou copie os arquivos para seu servidor/local.
+2. (Opcional) Configure um servidor Nginx para servir os arquivos estáticos e otimizar cache/compressão.
+3. Abra o `index.html` em seu navegador.
 
-| **Aspecto** | **Flask (anterior)** | **JavaScript (novo)** |
-|-------------|---------------------|----------------------|
-| **Deploy** | Requer servidor Python + Gunicorn | Funciona em qualquer servidor web estático |
-| **Dependências** | Flask, dotenv, scipy, numpy | Apenas navegador moderno |
-| **Configuração** | Arquivo .env, variáveis de ambiente | Interface visual para API Key |
-| **Portabilidade** | Limitada ao ambiente Python | Qualquer hosting estático (GitHub Pages, Netlify, etc.) |
-| **Manutenção** | Servidor sempre rodando | Zero manutenção de servidor |
+## Configuração do Servidor (Opcional)
+Para melhor performance, utilize Nginx com as seguintes opções:
+```nginx
+http {
+    gzip on;
+    gzip_types application/json application/javascript text/css text/html text/plain application/xml;
+    brotli on;
+    brotli_types application/json application/javascript text/css text/html text/plain application/xml;
+    gzip_static on;
+    brotli_static on;
+}
 
-## **Para começar a usar:**
+server {
+    listen 80;
+    server_name exemplo.local;
+    root /var/www/html;
 
-1. **Salve o arquivo como `index.html`**
-2. **Obtenha uma API Key do Google AI Studio**
-3. **Carregue seu arquivo `processed_docs.json` existente**
-4. **Hospede em qualquer servidor web estático**
+    location /ferramentas/lacunas/processed_docs.json {
+        add_header Cache-Control "public, max-age=86400, immutable";
+    }
 
-A ferramenta mantém a mesma qualidade de análise que a versão Flask, mas com muito mais simplicidade operacional. Perfeita para ambientes onde você precisa de portabilidade e facilidade de deploy, especialmente considerando seu background em documentação técnica e APIs.
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+## Próximos Passos
+- Suporte a streaming/lazy-loading de grandes bases de documentos
+- Métricas de performance e web vitals
+- Guia detalhado para usuários finais
+
+---
+*Documentação gerada automaticamente em 13 de junho de 2025.*
