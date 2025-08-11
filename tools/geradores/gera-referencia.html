@@ -193,7 +193,10 @@
     </style>
 </head>
 <body>
-    <h1>Gerador de Documentação de Referência</h1>
+<h1>Gerador de Documentação de Referência</h1>
+<div class="alert alert-info" style="margin-bottom:20px;">
+    <strong>Nota de Segurança:</strong> A chave de API do Google Gemini será solicitada via pop-up <b>sempre que for gerar documentação</b>. Ela <b>não será armazenada</b> no sistema.
+</div>
 
     <div class="card">
         <div class="step">
@@ -449,104 +452,106 @@ Ao criar a documentação, siga essas diretrizes:
         });
 
         // Iniciar geração da documentação
-        generateDocBtn.addEventListener('click', async () => {
-            // const apiKey = apiKeyInput.value.trim(); // Removido
-            const promptTemplate = promptTemplateInput.value.trim();
+generateDocBtn.addEventListener('click', async () => {
+    const promptTemplate = promptTemplateInput.value.trim();
 
-            // if (!apiKey) { // Removido
-            //     showAlert('Por favor, insira uma chave de API válida', 'error');
-            //     return;
-            // }
-            if (!promptTemplate) {
-                showAlert('Por favor, forneça um template de prompt para a IA.', 'error');
-                return;
-            }
-            if (selectedImageFiles.length === 0) {
-                showAlert('Por favor, selecione uma ou mais imagens para documentar', 'error');
-                return;
-            }
+    if (!promptTemplate) {
+        showAlert('Por favor, forneça um template de prompt para a IA.', 'error');
+        return;
+    }
+    if (selectedImageFiles.length === 0) {
+        showAlert('Por favor, selecione uma ou mais imagens para documentar', 'error');
+        return;
+    }
 
-            generateDocBtn.disabled = true;
-            generateDocBtn.innerHTML = '<span class="spinner"></span>Gerando Documentação...';
+    // Solicita a chave de API via pop-up
+    const apiKey = prompt('Insira sua chave de API do Google Gemini para gerar a documentação:');
+    if (!apiKey || !apiKey.trim()) {
+        showAlert('Chave de API não informada. A geração foi cancelada.', 'error');
+        return;
+    }
 
-            generatedDocumentParts = [];
-            totalGeneratedContent = '';
-            docsGeneratedCountEl.textContent = 0;
-            errorCountEl.textContent = 0;
-            progressBar.style.width = '0%';
-            generationProgress.classList.remove('hidden');
-            showStatus(`Iniciando geração de documentação para ${selectedImageFiles.length} imagem(ns)...`, 'info');
-            resultCard.classList.add('hidden');
+    generateDocBtn.disabled = true;
+    generateDocBtn.innerHTML = '<span class="spinner"></span>Gerando Documentação...';
 
-            let completedImages = 0;
+    generatedDocumentParts = [];
+    totalGeneratedContent = '';
+    docsGeneratedCountEl.textContent = 0;
+    errorCountEl.textContent = 0;
+    progressBar.style.width = '0%';
+    generationProgress.classList.remove('hidden');
+    showStatus(`Iniciando geração de documentação para ${selectedImageFiles.length} imagem(ns)...`, 'info');
+    resultCard.classList.add('hidden');
 
-            for (let i = 0; i < selectedImageFiles.length; i++) {
-                const file = selectedImageFiles[i];
-                const originalFileName = file.name;
-                const imageStatusElementId = `image-status-${originalFileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                const imageStatusEl = document.getElementById(imageStatusElementId);
+    let completedImages = 0;
 
-                if (imageStatusEl) {
-                    imageStatusEl.textContent = `${originalFileName} (Lendo imagem...)`;
-                    imageStatusEl.style.color = '#333';
-                }
+    for (let i = 0; i < selectedImageFiles.length; i++) {
+        const file = selectedImageFiles[i];
+        const originalFileName = file.name;
+        const imageStatusElementId = `image-status-${originalFileName.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const imageStatusEl = document.getElementById(imageStatusElementId);
 
-                try {
-                    const imageDataUrl = await readFileAsDataURL(file);
+        if (imageStatusEl) {
+            imageStatusEl.textContent = `${originalFileName} (Lendo imagem...)`;
+            imageStatusEl.style.color = '#333';
+        }
 
-                    if (imageStatusEl) {
-                        imageStatusEl.textContent = `${originalFileName} (Enviando para IA...)`;
-                        imageStatusEl.style.color = '#3498db';
-                    }
+        try {
+            const imageDataUrl = await readFileAsDataURL(file);
 
-                    // Chamar a função sem a apiKey
-                    const generatedDocPart = await generateDocumentation(imageDataUrl, promptTemplate, originalFileName);
-
-                    generatedDocumentParts.push(generatedDocPart);
-                    completedImages++;
-
-                    if (imageStatusEl) {
-                        imageStatusEl.textContent = `${originalFileName} (Documentado)`;
-                        imageStatusEl.style.color = 'green';
-                    }
-                    docsGeneratedCountEl.textContent = generatedDocumentParts.length;
-                    const progress = Math.round((completedImages / selectedImageFiles.length) * 100);
-                    progressBar.style.width = `${progress}%`;
-
-                } catch (error) {
-                    console.error(`Erro ao documentar a imagem ${originalFileName}:`, error);
-                    completedImages++;
-
-                    const imageStatusEl = document.getElementById(imageStatusElementId);
-                    if (imageStatusEl) {
-                        const displayErrorMessage = error.message.substring(0, 100) + (error.message.length > 100 ? '...' : '');
-                        imageStatusEl.textContent = `${originalFileName} (Erro: ${displayErrorMessage})`;
-                        imageStatusEl.style.color = 'red';
-                    }
-                    errorCountEl.textContent = parseInt(errorCountEl.textContent) + 1;
-                    const progress = Math.round((completedImages / selectedImageFiles.length) * 100);
-                    progressBar.style.width = `${progress}%`;
-                }
+            if (imageStatusEl) {
+                imageStatusEl.textContent = `${originalFileName} (Enviando para IA...)`;
+                imageStatusEl.style.color = '#3498db';
             }
 
-            if (generatedDocumentParts.length > 0) {
-                totalGeneratedContent = generatedDocumentParts.join('\n\n---\n\n');
+            // Passa a chave de API para a função de geração
+            const generatedDocPart = await generateDocumentation(imageDataUrl, promptTemplate, originalFileName, apiKey);
 
-                 showStatus(`Geração de documentação concluída. ${generatedDocumentParts.length} documento(s) gerado(s) com sucesso, ${errorCountEl.textContent} erro(s).`, 'success');
-                 resultCard.classList.remove('hidden');
+            generatedDocumentParts.push(generatedDocPart);
+            completedImages++;
 
-            } else if (errorCountEl.textContent > 0 && selectedImageFiles.length > 0) {
-                 showStatus(`Falha na geração de documentação para todas as imagens (${errorCountEl.textContent} erros).`, 'error');
-                 resultCard.classList.add('hidden');
-            } else {
-                 showStatus('Nenhum documento gerado.', 'info');
-                 resultCard.classList.add('hidden');
+            if (imageStatusEl) {
+                imageStatusEl.textContent = `${originalFileName} (Documentado)`;
+                imageStatusEl.style.color = 'green';
             }
+            docsGeneratedCountEl.textContent = generatedDocumentParts.length;
+            const progress = Math.round((completedImages / selectedImageFiles.length) * 100);
+            progressBar.style.width = `${progress}%`;
 
-            generateDocBtn.disabled = false;
-            generateDocBtn.innerHTML = 'Gerar Documentação';
-            generationProgress.classList.add('hidden');
-        });
+        } catch (error) {
+            console.error(`Erro ao documentar a imagem ${originalFileName}:`, error);
+            completedImages++;
+
+            const imageStatusEl = document.getElementById(imageStatusElementId);
+            if (imageStatusEl) {
+                const displayErrorMessage = error.message.substring(0, 100) + (error.message.length > 100 ? '...' : '');
+                imageStatusEl.textContent = `${originalFileName} (Erro: ${displayErrorMessage})`;
+                imageStatusEl.style.color = 'red';
+            }
+            errorCountEl.textContent = parseInt(errorCountEl.textContent) + 1;
+            const progress = Math.round((completedImages / selectedImageFiles.length) * 100);
+            progressBar.style.width = `${progress}%`;
+        }
+    }
+
+    if (generatedDocumentParts.length > 0) {
+        totalGeneratedContent = generatedDocumentParts.join('\n\n---\n\n');
+
+         showStatus(`Geração de documentação concluída. ${generatedDocumentParts.length} documento(s) gerado(s) com sucesso, ${errorCountEl.textContent} erro(s).`, 'success');
+         resultCard.classList.remove('hidden');
+
+    } else if (errorCountEl.textContent > 0 && selectedImageFiles.length > 0) {
+         showStatus(`Falha na geração de documentação para todas as imagens (${errorCountEl.textContent} erros).`, 'error');
+         resultCard.classList.add('hidden');
+    } else {
+         showStatus('Nenhum documento gerado.', 'info');
+         resultCard.classList.add('hidden');
+    }
+
+    generateDocBtn.disabled = false;
+    generateDocBtn.innerHTML = 'Gerar Documentação';
+    generationProgress.classList.add('hidden');
+});
 
         // Função para ler arquivo como Data URL (para imagens)
         function readFileAsDataURL(file) {
@@ -559,65 +564,65 @@ Ao criar a documentação, siga essas diretrizes:
         }
 
         // Função para chamar o proxy PHP para gerar documentação
-        async function generateDocumentation(imageDataUrl, promptTemplate, fileName) {
-            const proxyUrl = './proxy.php';
+async function generateDocumentation(imageDataUrl, promptTemplate, fileName, apiKey) {
+    const proxyUrl = './proxy.php';
 
-            const base64Data = imageDataUrl.split(',')[1];
-            const mimeType = imageDataUrl.split(',')[0].split(':')[1].split(';')[0];
+    const base64Data = imageDataUrl.split(',')[1];
+    const mimeType = imageDataUrl.split(',')[0].split(':')[1].split(';')[0];
 
-            const payload = {
-                "contents": [
+    const payload = {
+        "apiKey": apiKey,
+        "contents": [
+            {
+                "parts": [
+                    { "text": promptTemplate },
+                    { "text": `\n\nAnalise esta imagem (arquivo: ${fileName}):` },
                     {
-                        "parts": [
-                            { "text": promptTemplate },
-                            { "text": `\n\nAnalise esta imagem (arquivo: ${fileName}):` },
-                            {
-                                "inline_data": {
-                                    "mime_type": mimeType,
-                                    "data": base64Data
-                                }
-                            }
-                        ]
+                        "inline_data": {
+                            "mime_type": mimeType,
+                            "data": base64Data
+                        }
                     }
                 ]
-            };
-
-            try {
-                console.log(`Enviando imagem ${fileName} para o proxy...`);
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json",
-                        // A chave da API NÃO é enviada aqui do frontend
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    let errorDetails = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorDetails);
-                        errorDetails = errorJson.error.message || errorDetails;
-                    } catch (e) { /* ignore */ }
-                    console.error(`Erro do proxy ao processar imagem ${fileName}: Status ${response.status}`, errorDetails);
-                    throw new Error(`Erro do proxy (${response.status}): ${errorDetails}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
-                    console.error(`Resposta inválida do proxy para imagem ${fileName}:`, data);
-                    throw new Error(`Resposta inválida do proxy`);
-                }
-
-                const generatedText = data.candidates[0].content.parts[0].text.trim();
-                return generatedText;
-
-            } catch (error) {
-                console.error(`Falha na chamada ao proxy para imagem ${fileName}:`, error);
-                throw error;
             }
+        ]
+    };
+
+    try {
+        console.log(`Enviando imagem ${fileName} para o proxy...`);
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            let errorDetails = await response.text();
+            try {
+                const errorJson = JSON.parse(errorDetails);
+                errorDetails = errorJson.error.message || errorDetails;
+            } catch (e) { /* ignore */ }
+            console.error(`Erro do proxy ao processar imagem ${fileName}: Status ${response.status}`, errorDetails);
+            throw new Error(`Erro do proxy (${response.status}): ${errorDetails}`);
         }
+
+        const data = await response.json();
+
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
+            console.error(`Resposta inválida do proxy para imagem ${fileName}:`, data);
+            throw new Error(`Resposta inválida do proxy`);
+        }
+
+        const generatedText = data.candidates[0].content.parts[0].text.trim();
+        return generatedText;
+
+    } catch (error) {
+        console.error(`Falha na chamada ao proxy para imagem ${fileName}:`, error);
+        throw error;
+    }
+}
 
         // Download do arquivo de documentação final
         downloadDocBtn.addEventListener('click', () => {

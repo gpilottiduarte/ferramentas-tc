@@ -111,12 +111,12 @@
                         <label for="version" class="form-label">Número da Versão</label>
                         <input type="text" class="form-control" id="version" placeholder="Ex: 1.2.3">
                     </div>
-                    <div class="mb-3">
-                        <label for="geminiApiKey" class="form-label">Chave API do Google Gemini</label>
-                        <input type="text" class="form-control api-key-input" id="geminiApiKey"
-                               value="" placeholder="Insira sua chave API do Google Gemini aqui">
-                        <div class="form-text">Chave usada para gerar os textos de changelog via Google Gemini.</div>
-                    </div>
+<div class="mb-3">
+    <label class="form-label">Chave API do Google Gemini</label>
+    <div class="form-text">
+        Por segurança, a chave será solicitada via pop-up <strong>sempre que for gerar um texto</strong>. Ela <b>não será armazenada</b> no sistema.
+    </div>
+</div>
                 </div>
             </div>
 
@@ -619,17 +619,17 @@
                 button.disabled = true;
             }
 
-            const apiKey = document.getElementById('geminiApiKey').value.trim(); // Pega a chave do Gemini
-            const instructions = document.getElementById('aiInstructions').value.trim();
+const apiKey = prompt('Insira sua chave de API do Google Gemini para gerar o texto deste changelog:');
+const instructions = document.getElementById('aiInstructions').value.trim();
 
-            if (!apiKey) {
-                showAlert('Por favor, insira uma chave de API válida na Etapa 1.', 'danger');
-                if (button) {
-                    button.innerHTML = 'Gerar';
-                    button.disabled = false;
-                }
-                return;
-            }
+if (!apiKey || !apiKey.trim()) {
+    showAlert('Chave de API não informada. A geração foi cancelada.', 'danger');
+    if (button) {
+        button.innerHTML = 'Gerar';
+        button.disabled = false;
+    }
+    return;
+}
 
             const promptText = `
                 ${instructions}

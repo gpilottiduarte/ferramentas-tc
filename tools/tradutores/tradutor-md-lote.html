@@ -178,7 +178,10 @@
     </style>
 </head>
 <body>
-    <h1>Tradutor de Markdown (PT → EN)</h1>
+<h1>Tradutor de Markdown (PT → EN)</h1>
+<div class="alert alert-info" style="margin-bottom:20px;">
+    <strong>Nota de Segurança:</strong> A chave de API do Google Gemini será solicitada via pop-up <b>sempre que for traduzir</b>. Ela <b>não será armazenada</b> no sistema.
+</div>
 
     <div class="card">
         <div class="step">
@@ -313,107 +316,105 @@
 
 
         // Iniciar tradução em massa
-        translateBtn.addEventListener('click', async () => {
-            // const apiKey = apiKeyInput.value.trim(); // Removido: A chave agora está no backend
+translateBtn.addEventListener('click', async () => {
+    if (selectedFiles.length === 0) {
+        showAlert('Por favor, selecione um ou mais arquivos para traduzir', 'error');
+        return;
+    }
 
-            // if (!apiKey) { // Removido: Verificação de API Key no frontend não é mais necessária
-            //     showAlert('Por favor, insira uma chave de API válida', 'error');
-            //     return;
-            // }
+    // Solicita a chave de API via pop-up
+    const apiKey = prompt('Insira sua chave de API do Google Gemini para traduzir os documentos:');
+    if (!apiKey || !apiKey.trim()) {
+        showAlert('Chave de API não informada. A tradução foi cancelada.', 'error');
+        return;
+    }
 
-            if (selectedFiles.length === 0) {
-                showAlert('Por favor, selecione um ou mais arquivos para traduzir', 'error');
-                return;
+    // Desabilitar botão durante a tradução
+    translateBtn.disabled = true;
+    translateBtn.innerHTML = '<span class="spinner"></span>Traduzindo...';
+
+    // Resetar progresso e status
+    translatedFiles = {};
+    translationErrors = {};
+    translatedCountEl.textContent = 0;
+    errorCountEl.textContent = 0;
+    progressBar.style.width = '0%';
+    translationProgress.classList.remove('hidden');
+    showStatus(`Iniciando tradução de ${selectedFiles.length} arquivo(s)...`, 'info');
+    resultCard.classList.add('hidden');
+
+    let completedTranslations = 0;
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const originalFilename = file.name;
+        const fileStatusElementId = `file-status-${originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const fileStatusEl = document.getElementById(fileStatusElementId);
+
+         if (fileStatusEl) {
+             fileStatusEl.textContent = `${originalFilename} (Lendo...)`;
+             fileStatusEl.style.color = '#333';
+         }
+
+        try {
+            const originalContent = await readFileContent(file);
+
+             if (fileStatusEl) {
+                fileStatusEl.textContent = `${originalFilename} (Traduzindo...)`;
+                fileStatusEl.style.color = '#3498db';
+             }
+
+            // Chamar a função de tradução passando a apiKey
+            const translatedText = await translateMarkdown(originalContent, apiKey);
+
+            translatedFiles[originalFilename] = translatedText;
+
+            completedTranslations++;
+             if (fileStatusEl) {
+                fileStatusEl.textContent = `${originalFilename} (Concluído)`;
+                fileStatusEl.style.color = 'green';
+             }
+            translatedCountEl.textContent = Object.keys(translatedFiles).length;
+            const progress = Math.round((completedTranslations / selectedFiles.length) * 100);
+            progressBar.style.width = `${progress}%`;
+
+        } catch (error) {
+            console.error(`Erro ao traduzir o arquivo ${originalFilename}:`, error);
+            translationErrors[originalFilename] = error.message;
+            completedTranslations++;
+
+            const fileStatusEl = document.getElementById(fileStatusElementId);
+            if (fileStatusEl) {
+               const displayErrorMessage = error.message.substring(0, 100) + (error.message.length > 100 ? '...' : '');
+               fileStatusEl.textContent = `${originalFilename} (Erro: ${displayErrorMessage})`;
+               fileStatusEl.style.color = 'red';
             }
+            errorCountEl.textContent = Object.keys(translationErrors).length;
+            const progress = Math.round((completedTranslations / selectedFiles.length) * 100);
+            progressBar.style.width = `${progress}%`;
+        }
+    }
 
-            // Desabilitar botão durante a tradução
-            translateBtn.disabled = true;
-            translateBtn.innerHTML = '<span class="spinner"></span>Traduzindo...';
+    translateBtn.disabled = false;
+    translateBtn.innerHTML = 'Traduzir Documentos Selecionados';
+    translationProgress.classList.add('hidden');
 
-            // Resetar progresso e status
-            translatedFiles = {};
-            translationErrors = {};
-            translatedCountEl.textContent = 0;
-            errorCountEl.textContent = 0;
-            progressBar.style.width = '0%';
-            translationProgress.classList.remove('hidden');
-            showStatus(`Iniciando tradução de ${selectedFiles.length} arquivo(s)...`, 'info');
-            resultCard.classList.add('hidden');
+    if (Object.keys(translatedFiles).length > 0) {
+         showStatus(`Tradução em massa concluída. ${Object.keys(translatedFiles).length} arquivo(s) traduzido(s) com sucesso, ${Object.keys(translationErrors).length} erro(s).`, 'success');
+         resultCard.classList.remove('hidden');
+    } else if (Object.keys(translationErrors).length === selectedFiles.length && selectedFiles.length > 0) {
+         showStatus(`Falha na tradução de todos os arquivos (${Object.keys(translationErrors).length} erros). Verifique a chave da API.`, 'error');
+         resultCard.classList.add('hidden');
+    } else {
+         showStatus(`Tradução em massa concluída com ${Object.keys(translationErrors).length} erro(s). Alguns arquivos podem ter falhado.`, 'warning');
+         if (Object.keys(translatedFiles).length > 0) {
+             resultCard.classList.remove('hidden');
+         } else {
+              resultCard.classList.add('hidden');
+         }
+    }
 
-            let completedTranslations = 0;
-
-            for (let i = 0; i < selectedFiles.length; i++) {
-                const file = selectedFiles[i];
-                const originalFilename = file.name;
-                const fileStatusElementId = `file-status-${originalFilename.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-                const fileStatusEl = document.getElementById(fileStatusElementId);
-
-
-                 if (fileStatusEl) {
-                     fileStatusEl.textContent = `${originalFilename} (Lendo...)`;
-                     fileStatusEl.style.color = '#333';
-                 }
-
-                try {
-                    const originalContent = await readFileContent(file);
-
-                     if (fileStatusEl) {
-                        fileStatusEl.textContent = `${originalFilename} (Traduzindo...)`;
-                        fileStatusEl.style.color = '#3498db';
-                     }
-
-                    // Chamar a função de tradução (sem a apiKey)
-                    const translatedText = await translateMarkdown(originalContent);
-
-                    translatedFiles[originalFilename] = translatedText;
-
-                    completedTranslations++;
-                     if (fileStatusEl) {
-                        fileStatusEl.textContent = `${originalFilename} (Concluído)`;
-                        fileStatusEl.style.color = 'green';
-                     }
-                    translatedCountEl.textContent = Object.keys(translatedFiles).length;
-                    const progress = Math.round((completedTranslations / selectedFiles.length) * 100);
-                    progressBar.style.width = `${progress}%`;
-
-
-                } catch (error) {
-                    console.error(`Erro ao traduzir o arquivo ${originalFilename}:`, error);
-                    translationErrors[originalFilename] = error.message;
-                    completedTranslations++;
-
-                    const fileStatusEl = document.getElementById(fileStatusElementId);
-                    if (fileStatusEl) {
-                       const displayErrorMessage = error.message.substring(0, 100) + (error.message.length > 100 ? '...' : '');
-                       fileStatusEl.textContent = `${originalFilename} (Erro: ${displayErrorMessage})`;
-                       fileStatusEl.style.color = 'red';
-                    }
-                    errorCountEl.textContent = Object.keys(translationErrors).length;
-                    const progress = Math.round((completedTranslations / selectedFiles.length) * 100);
-                    progressBar.style.width = `${progress}%`;
-                }
-            }
-
-            translateBtn.disabled = false;
-            translateBtn.innerHTML = 'Traduzir Documentos Selecionados';
-            translationProgress.classList.add('hidden');
-
-            if (Object.keys(translatedFiles).length > 0) {
-                 showStatus(`Tradução em massa concluída. ${Object.keys(translatedFiles).length} arquivo(s) traduzido(s) com sucesso, ${Object.keys(translationErrors).length} erro(s).`, 'success');
-                 resultCard.classList.remove('hidden');
-            } else if (Object.keys(translationErrors).length === selectedFiles.length && selectedFiles.length > 0) {
-                 showStatus(`Falha na tradução de todos os arquivos (${Object.keys(translationErrors).length} erros). Verifique a chave da API.`, 'error');
-                 resultCard.classList.add('hidden');
-            } else {
-                 showStatus(`Tradução em massa concluída com ${Object.keys(translationErrors).length} erro(s). Alguns arquivos podem ter falhado.`, 'warning');
-                 if (Object.keys(translatedFiles).length > 0) {
-                     resultCard.classList.remove('hidden');
-                 } else {
-                      resultCard.classList.add('hidden');
-                 }
-            }
-
-        });
+});
 
         // Função para ler o conteúdo do arquivo
         function readFileContent(file) {
@@ -426,64 +427,64 @@
         }
 
         // Função para traduzir o markdown usando o proxy PHP
-        async function translateMarkdown(markdownText) {
-            const instructionText =
-                "Translate the following markdown document from Portuguese to English. " +
-                "IMPORTANT: Keep all markdown formatting intact, including headers (#), lists, links, etc. " +
-                "Do not translate code blocks or variable names.";
+async function translateMarkdown(markdownText, apiKey) {
+    const instructionText =
+        "Translate the following markdown document from Portuguese to English. " +
+        "IMPORTANT: Keep all markdown formatting intact, including headers (#), lists, links, etc. " +
+        "Do not translate code blocks or variable names.";
 
-            const fullText = instructionText + "\n\n" + markdownText;
+    const fullText = instructionText + "\n\n" + markdownText;
 
-            // URL do seu proxy PHP
-            const proxyUrl = './proxy.php';
+    // URL do seu proxy PHP
+    const proxyUrl = './proxy.php';
 
-            const payload = {
-                "contents": [
-                    {
-                        "parts": [
-                            { "text": fullText }
-                        ]
-                    }
+    const payload = {
+        "apiKey": apiKey,
+        "contents": [
+            {
+                "parts": [
+                    { "text": fullText }
                 ]
-            };
-
-            try {
-                console.log(`Chamando proxy para tradução: ${proxyUrl}`);
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json",
-                        // A chave da API NÃO é enviada aqui do frontend
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    let errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        errorText = errorJson.error.message || errorText;
-                    } catch (e) { /* ignore */ }
-                    console.error(`Erro recebido do proxy: Status ${response.status}`, errorText);
-                    throw new Error(`Erro do proxy (${response.status}): ${errorText}`);
-                }
-
-                const data = await response.json();
-
-                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
-                     console.error(`Resposta inválida do proxy:`, data);
-                     throw new Error(`Resposta inválida do proxy`);
-                }
-
-                const translatedText = data.candidates[0].content.parts[0].text.trim();
-
-                return translatedText;
-
-            } catch (error) {
-                console.error('Erro na tradução com proxy:', error);
-                throw error;
             }
+        ]
+    };
+
+    try {
+        console.log(`Chamando proxy para tradução: ${proxyUrl}`);
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            let errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorText = errorJson.error.message || errorText;
+            } catch (e) { /* ignore */ }
+            console.error(`Erro recebido do proxy: Status ${response.status}`, errorText);
+            throw new Error(`Erro do proxy (${response.status}): ${errorText}`);
         }
+
+        const data = await response.json();
+
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
+             console.error(`Resposta inválida do proxy:`, data);
+             throw new Error(`Resposta inválida do proxy`);
+        }
+
+        const translatedText = data.candidates[0].content.parts[0].text.trim();
+
+        return translatedText;
+
+    } catch (error) {
+        console.error('Erro na tradução com proxy:', error);
+        throw error;
+    }
+}
 
         // Download do arquivo ZIP
         downloadZipBtn.addEventListener('click', async () => {
