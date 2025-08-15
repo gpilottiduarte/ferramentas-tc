@@ -1,0 +1,4 @@
+output/
+.venv/
+embeddings*
+dados_train/

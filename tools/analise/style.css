@@ -107,10 +107,11 @@ textarea:focus {
   border-color: #2d3748;
   box-shadow: 0 0 0 2px rgba(45,55,72,0.1);
 }
-.analyze-button {
+
+.analyzeBtn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(90deg, #97a5b3 0%, #193146 100%);
+  background: linear-gradient(90deg, #24619e 0%, #193146 100%);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -119,16 +120,18 @@ textarea:focus {
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-.analyze-button:hover:not(:disabled) {
+
+.analyzeBtn:hover:not(:disabled) {
   background: linear-gradient(90deg, #205b92 0%, #205b92 100%);
   box-shadow: 0 4px 16px rgba(40, 167, 69, 0.25);
   outline: none;
 }
-}
-.analyze-button:disabled {
+
+.analyzeBtn:disabled {
   background-color: #a0aec0;
   cursor: not-allowed;
 }
+
 .response-container {
   margin-top: 24px;
 }
@@ -238,36 +241,31 @@ textarea:focus {
   font-size: 1rem;
 }
 
-.model-selection-section {
-  background: #f0f8ff;
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--box-shadow);
+.model-selection {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  border: 2px solid #007bff;
+  margin-bottom: 1.5rem;
 }
 
-.model-selection-section .form-label {
-  font-weight: 700;
-  color: #0056b3;
+.model-selection label {
+  font-weight: 600;
+  color: #2d3748;
 }
 
-.model-selection-section .form-control {
-  border-radius: var(--border-radius);
-  border: 2px solid #007bff;
-  padding: 0.6rem;
-  transition: var(--transition);
-  background-color: #ffffff;
-  color: #333;
-  font-weight: 500;
+.model-selection select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e0;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #2d3748;
 }
 
-.model-selection-section .form-control:focus {
-  border-color: #0056b3;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+.model-selection select:focus {
+  outline: none;
+  border-color: #2d3748;
+  box-shadow: 0 0 0 2px rgba(45,55,72,0.1);
 }
 
 #downloadReportBtn {
@@ -309,4 +307,43 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.button-row button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.loader-text {
+  font-size: 1.2rem;
+  color: #555;
+  margin-top: 20px;
+}
+
+.language-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.language-selection label {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.language-selection select {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e0;
+  font-size: 1rem;
+  background-color: #fff;
+  color: #2d3748;
+}
+
+.language-selection select:focus {
+  outline: none;
+  border-color: #2d3748;
+  box-shadow: 0 0 0 2px rgba(45,55,72,0.1);
 }

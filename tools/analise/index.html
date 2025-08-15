@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Análise de Cobertura de Documentação</title>
+  <style>
+    :root {
+      --primary: #14532d;
+      --secondary: #166534;
+      --bg: #e6f4ea;
+      --text: #1a2e22;
+      --card-bg: #fff;
+      --card-border: #22c55e;
+      --shadow: 0 2px 12px rgba(20,83,45,0.08);
+    }
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      margin: 3rem auto 2rem auto;
+      padding: 0 1.5rem;
+      background: none;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .form-group, .language-selection, .model-selection {
+      margin-bottom: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    label {
+      font-weight: 500;
+      color: var(--secondary);
+      margin-bottom: 0.2rem;
+    }
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      border: 1px solid #b6e2c6;
+      border-radius: 6px;
+      padding: 0.7rem;
+      font-size: 1rem;
+      resize: vertical;
+      background: #f6fff9;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      transition: border 0.2s;
+    }
+    textarea:focus {
+      border-color: var(--primary);
+      outline: none;
+    }
+    select {
+      padding: 0.4rem 0.6rem;
+      border-radius: 5px;
+      border: 1px solid #b6e2c6;
+      background: #f6fff9;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .analyzeBtn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: background 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .analyzeBtn:disabled {
+      background: #b6e2c6;
+      color: #fff;
+      cursor: not-allowed;
+    }
+    .analyzeBtn:hover:not(:disabled) {
+      background: var(--secondary);
+    }
+    .response-container {
+      margin-top: 2rem;
+    }
+    #output {
+      background: var(--card-bg);
+      border-left: 5px solid var(--card-border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 2.5rem 3.5rem 2.5rem 3.5rem;
+      margin: 0 auto 2.5rem auto;
+      max-width: 900px;
+      min-height: 80px;
+      font-size: 1.13rem;
+      line-height: 1.8;
+      word-break: break-word;
+      color: var(--text);
+      transition: box-shadow 0.2s;
+      letter-spacing: 0.01em;
+    }
+    #output p {
+      margin-bottom: 1.4rem;
+      margin-top: 0.7rem;
+    }
+    #output ul, #output ol {
+      margin-left: 2.2rem;
+      margin-bottom: 1.5rem;
+    }
+    #output h1, #output h2, #output h3 {
+      color: var(--primary);
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    #output ul, #output ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    #output p {
+      margin-bottom: 1.1rem;
+    }
+    #output strong {
+      color: var(--secondary);
+    }
+    #output code {
+      background: #e6f4ea;
+      color: var(--primary);
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+      font-size: 0.98em;
+    }
+    #output pre {
+      background: #e6f4ea;
+      color: var(--dark-color);
+      padding: 1em;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin-bottom: 1.2rem;
+    }
+    #output blockquote {
+      border-left: 4px solid var(--secondary);
+      background: #f0fdf4;
+      color: #22543d;
+      padding: 0.8em 1.2em;
+      margin: 1.2em 0;
+      border-radius: 6px;
+      font-style: italic;
+    }
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 4px solid #b6e2c6;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .error {
+      color: #b91c1c;
+      background: #fff0f0;
+      border-left: 4px solid #b91c1c;
+      padding: 1rem 1.2rem;
+      border-radius: 6px;
+      margin: 1.2em 0;
+      font-weight: 500;
+    }
+    @media (max-width: 700px) {
+      .container {
+        max-width: 98vw;
+        padding: 0 0.5rem;
+      }
+      #output {
+        padding: 1.2rem 0.7rem 1rem 0.7rem;
+      }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+</head>
+<body>
+  <div class="container">
+    <h1>Análise de cobertura da documentação</h1>
+
+    <div class="form-group" style="max-width: 500px; margin: 0 auto 20px auto;">
+      <label for="openaiApiKey" style="font-weight: 500;">Chave API da OpenAI</label>
+      <div style="display: flex; gap: 8px;">
+        <input type="password" id="openaiApiKey" class="api-key-input" style="flex:1; padding: 10px; border: 1px solid #b6e2c6; border-radius: 4px; font-family: monospace;" placeholder="Insira sua chave API da OpenAI aqui" autocomplete="off">
+        <button type="button" id="saveOpenaiKeyBtn" class="btn btn-secondary" style="padding: 0 16px; min-width: 80px;"><span style="margin-right:4px;" class="fa fa-save"></span>Salvar</button>
+      </div>
+      <div style="font-size: 0.95em; color: #555; margin-top: 2px;">A chave é salva localmente no seu navegador e usada para autenticar as requisições à OpenAI.</div>
+    </div>
+
+    <div class="form-group">
+      <label for="inputText">Texto a ser analisado</label>
+      <textarea id="inputText" placeholder="Cole seu texto aqui"></textarea>
+    </div>
+
+    <section class="language-selection">
+      <label for="languageSelect">Selecione o Idioma:</label>
+      <select id="languageSelect">
+        <option value="pt">Português (PT-BR)</option>
+        <option value="en">English (EN-US)</option>
+      </select>
+    </section>
+
+    <section class="model-selection">
+      <label for="modelSelect">Selecione o Modelo:</label>
+      <select id="modelSelect">
+        <option value="ft:gpt-4.1-nano-2025-04-14:personal:docs-ft:BhiBDwSd">Modelo Fine-Tuned</option>
+        <option value="gpt-4-turbo">Modelo GPT-4 Turbo (Padrão)</option>
+      </select>
+    </section>
+
+    <button id="analyzeBtn" class="analyzeBtn">Analisar</button>
+    
+    <div class="response-container">
+      <div id="output"></div>
+    </div>
+  </div>
+
+  <script type="module">
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const inputText = document.getElementById('inputText');
+  const output = document.getElementById('output');
+  const modelSelect = document.getElementById('modelSelect');
+  const languageSelect = document.getElementById('languageSelect');
+  const openaiApiKeyInput = document.getElementById('openaiApiKey');
+  const saveOpenaiKeyBtn = document.getElementById('saveOpenaiKeyBtn');
+
+  // Carregar chave do localStorage ao iniciar
+  document.addEventListener('DOMContentLoaded', function() {
+    const savedKey = localStorage.getItem('openaiApiKey');
+    if (savedKey) {
+      openaiApiKeyInput.value = savedKey;
+    }
+  });
+
+  // Botão para salvar a chave no localStorage
+  saveOpenaiKeyBtn.addEventListener('click', function() {
+    const key = openaiApiKeyInput.value.trim();
+    if (key) {
+      localStorage.setItem('openaiApiKey', key);
+      showAlert('Chave da OpenAI salva no navegador!', 'success');
+    } else {
+      showAlert('Insira uma chave antes de salvar.', 'error');
+    }
+  });
+
+  function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.textContent = message;
+    if (type === 'success') {
+      alertDiv.style.background = '#d4edda';
+      alertDiv.style.color = '#155724';
+      alertDiv.style.border = '1px solid #a6e6b7';
+      alertDiv.style.fontWeight = 'bold';
+      alertDiv.style.boxShadow = '0 2px 8px rgba(34,197,94,0.08)';
+    }
+    document.body.insertBefore(alertDiv, document.body.firstChild);
+    setTimeout(() => {
+      alertDiv.style.opacity = '0';
+      alertDiv.style.transition = 'opacity 0.5s';
+      setTimeout(() => alertDiv.remove(), 500);
+    }, 4000);
+  }
+
+  const PROXY_ENDPOINT = 'https://proxy-api-black-xi.vercel.app/api';
+
+  const EMBED_MODELS = {
+    'pt': 'text-embedding-ada-002',
+    'en': 'text-embedding-ada-002'
+  };
+
+  analyzeBtn.addEventListener('click', () => {
+    const text = inputText.value.trim();
+    if (!text) return alert('Por favor, insira o texto a ser analisado.');
+
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = 'Analisando...';
+    output.innerHTML = `
+      <div class="loader">
+        <div class="spinner"></div>
+        <p class="loader-text">Conectando com o serviço...</p>
+      </div>
+    `;
+
+    const language = languageSelect.value;
+    const embeddingsFile = language === 'pt' ? './embeddings-pt.json' : './embeddings-en.json';
+    const embedModel = EMBED_MODELS[language];
+    const chatModel = modelSelect.value;
+    const openaiApiKey = openaiApiKeyInput.value.trim() || localStorage.getItem('openaiApiKey') || '';
+
+    fetch(embeddingsFile)
+      .then(response => response.json())
+      .then(async embeddings => {
+        // 1. Calcular similaridade do texto do usuário com os embeddings
+        const loaderText = document.querySelector('.loader-text');
+        loaderText.textContent = 'Calculando similaridade com os documentos...';
+
+        // Função para gerar embedding do texto do usuário
+        async function getEmbedding(text, apiKey, model) {
+          const url = "https://api.openai.com/v1/embeddings";
+          const payload = {
+            input: text,
+            model: model
+          };
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`
+            },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+            let errorText = await response.text();
+            throw new Error(`Erro ao gerar embedding: ${errorText}`);
+          }
+          const data = await response.json();
+          return data.data[0].embedding;
+        }
+
+        // Função para calcular similaridade de cosseno
+        function cosineSimilarity(a, b) {
+          let dot = 0, normA = 0, normB = 0;
+          for (let i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+          }
+          return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+        }
+
+        try {
+          // 2. Gerar embedding do texto do usuário
+          const userEmbedding = await getEmbedding(text, openaiApiKey, embedModel);
+
+          // 3. Calcular similaridade com todos os embeddings
+          const similarities = embeddings.map((item, idx) => ({
+            idx,
+            similarity: cosineSimilarity(userEmbedding, item.embedding)
+          }));
+
+          // 4. Selecionar os N documentos mais similares
+          similarities.sort((a, b) => b.similarity - a.similarity);
+          const topN = 5;
+          const topDocs = similarities.slice(0, topN).map(s => embeddings[s.idx]);
+
+          // 5. Montar o prompt para o modelo de chat
+          loaderText.textContent = 'Consultando a inteligência artificial para gerar o relatório...';
+
+          let context = topDocs.map((doc, i) => {
+            // Se houver campo title ou name, use, senão use início do texto
+            let docLabel = doc.title || doc.name || `Documento ${i + 1}`;
+            let docText = typeof doc.text === "string" ? doc.text : "";
+            let snippet = docText.slice(0, 120).replace(/\n/g, " ") + (docText.length > 120 ? "..." : "");
+            return `---\n${docLabel}:\n${snippet}\nTexto completo:\n${docText}\n`;
+          }).join('\n\n');
+
+          const prompt = `Você é um assistente de análise de documentação. Com base nos documentos abaixo e no texto do usuário, gere um relatório detalhado de cobertura, lacunas e sugestões.
+
+IMPORTANTE: Para cada informação apresentada, cite explicitamente o(s) documento(s) de onde ela foi extraída, usando o nome/título (ou trecho inicial) do documento. Ao final do relatório, inclua uma seção "Fontes" listando os documentos principais utilizados, com seus títulos ou trechos iniciais.
+
+${context}
+
+Texto do usuário:
+${text}
+
+Responda em markdown, com seções claras e objetivas, sempre referenciando os documentos usados.`;
+
+          // 6. Chamar a API OpenAI (chat/completions)
+          const chatUrl = "https://api.openai.com/v1/chat/completions";
+          const chatPayload = {
+            model: chatModel,
+            messages: [
+              { role: "system", content: "Você é um assistente de análise de documentação técnica." },
+              { role: "user", content: prompt }
+            ],
+            temperature: 0.2,
+            max_tokens: 2048
+          };
+          const chatResponse = await fetch(chatUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${openaiApiKey}`
+            },
+            body: JSON.stringify(chatPayload)
+          });
+          if (!chatResponse.ok) {
+            let errorText = await chatResponse.text();
+            throw new Error(`Erro da OpenAI: ${errorText}`);
+          }
+          const chatData = await chatResponse.json();
+          const report = chatData.choices?.[0]?.message?.content || 'Não foi possível obter uma resposta.';
+
+          output.innerHTML = marked.parse(report);
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = 'Analisar';
+        } catch (error) {
+          output.innerHTML = `<div class="error"><strong>Erro:</strong> ${error.message}</div>`;
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = 'Analisar';
+        }
+      })
+      .catch(error => {
+        output.innerHTML = `<div class="error"><strong>Erro ao carregar embeddings:</strong> ${error}</div>`;
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = 'Analisar';
+      });
+  });
+  </script>
+</body>
+</html>

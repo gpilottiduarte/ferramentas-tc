@@ -172,7 +172,10 @@
     </style>
 </head>
 <body>
-    <h1>Tradutor de Markdown (PT → EN)</h1>
+<h1>Tradutor de Markdown (PT → EN)</h1>
+<div class="alert alert-info" style="margin-bottom:20px;">
+    <strong>Nota de Segurança:</strong> A chave de API do Google Gemini será solicitada via pop-up <b>sempre que for traduzir</b>. Ela <b>não será armazenada</b> no sistema.
+</div>
 
     <div class="card">
         <div class="step">
@@ -294,53 +297,53 @@
         });
 
         // Iniciar tradução quando o botão for clicado
-        translateBtn.addEventListener('click', async () => {
-            // const apiKey = apiKeyInput.value.trim(); // Removido: A chave agora está no backend
+translateBtn.addEventListener('click', async () => {
+    if (!originalContent) {
+        showAlert('Por favor, selecione um arquivo para traduzir', 'error');
+        return;
+    }
 
-            // if (!apiKey) { // Removido: Verificação de API Key no frontend não é mais necessária
-            //     showAlert('Por favor, insira uma chave de API válida', 'error');
-            //     return;
-            // }
+    // Solicita a chave de API via pop-up
+    const apiKey = prompt('Insira sua chave de API do Google Gemini para traduzir o documento:');
+    if (!apiKey || !apiKey.trim()) {
+        showAlert('Chave de API não informada. A tradução foi cancelada.', 'error');
+        return;
+    }
 
-            if (!originalContent) {
-                showAlert('Por favor, selecione um arquivo para traduzir', 'error');
-                return;
-            }
+    // Desabilitar botão durante a tradução
+    translateBtn.disabled = true;
+    translateBtn.innerHTML = '<span class="spinner"></span>Traduzindo...';
 
-            // Desabilitar botão durante a tradução
-            translateBtn.disabled = true;
-            translateBtn.innerHTML = '<span class="spinner"></span>Traduzindo...';
+    // Mostrar barra de progresso
+    translationProgress.classList.remove('hidden');
+    progressBar.style.width = '10%';
 
-            // Mostrar barra de progresso
-            translationProgress.classList.remove('hidden');
-            progressBar.style.width = '10%';
+    // Atualizar status
+    showStatus('Iniciando tradução com Google Gemini...', 'info');
 
-            // Atualizar status
-            showStatus('Iniciando tradução com Google Gemini...', 'info');
+    try {
+        // Traduzir o conteúdo passando a chave de API
+        translatedContent = await translateMarkdown(originalContent, apiKey);
 
-            try {
-                // Traduzir o conteúdo (chama sem a apiKey, pois o proxy a adicionará)
-                translatedContent = await translateMarkdown(originalContent);
+        // Atualizar progresso
+        progressBar.style.width = '100%';
 
-                // Atualizar progresso
-                progressBar.style.width = '100%';
+        // Mostrar resultado
+        translationPreviewEl.textContent = translatedContent;
+        resultCard.classList.remove('hidden');
 
-                // Mostrar resultado
-                translationPreviewEl.textContent = translatedContent;
-                resultCard.classList.remove('hidden');
+        // Atualizar status
+        showStatus('Tradução concluída com sucesso!', 'success');
 
-                // Atualizar status
-                showStatus('Tradução concluída com sucesso!', 'success');
-
-            } catch (error) {
-                showStatus(`Erro na tradução: ${error.message}`, 'error');
-                progressBar.style.width = '0%';
-            } finally {
-                // Restaurar botão
-                translateBtn.disabled = false;
-                translateBtn.innerHTML = 'Traduzir Documento';
-            }
-        });
+    } catch (error) {
+        showStatus(`Erro na tradução: ${error.message}`, 'error');
+        progressBar.style.width = '0%';
+    } finally {
+        // Restaurar botão
+        translateBtn.disabled = false;
+        translateBtn.innerHTML = 'Traduzir Documento';
+    }
+});
 
         // Download do arquivo traduzido
         downloadBtn.addEventListener('click', () => {
@@ -392,72 +395,72 @@
         }
 
         // Função para traduzir o markdown usando o proxy PHP
-        async function translateMarkdown(markdownText) {
-            const instructionText =
-                "Translate the following markdown document from Portuguese to English. " +
-                "IMPORTANT: Keep all markdown formatting intact, including headers (#), lists, links, etc. " +
-                "Do not translate code blocks or variable names.";
+async function translateMarkdown(markdownText, apiKey) {
+    const instructionText =
+        "Translate the following markdown document from Portuguese to English. " +
+        "IMPORTANT: Keep all markdown formatting intact, including headers (#), lists, links, etc. " +
+        "Do not translate code blocks or variable names.";
 
-            const fullText = instructionText + "\n\n" + markdownText;
+    const fullText = instructionText + "\n\n" + markdownText;
 
-            // URL do seu proxy PHP
-            const proxyUrl = './proxy.php';
+    // URL do seu proxy PHP
+    const proxyUrl = './proxy.php';
 
-            const payload = {
-                "contents": [
-                    {
-                        "parts": [
-                            { "text": fullText }
-                        ]
-                    }
-                ],
-                "generationConfig": {
-                    "maxOutputTokens": 8000,
-                    "temperature": 0.3
-                }
-            };
-
-            try {
-                console.log(`Chamando proxy para tradução...`);
-                const response = await fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json",
-                        // A chave da API NÃO é enviada aqui do frontend
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                progressBar.style.width = '60%';
-                showStatus('Processando resposta do Google Gemini via proxy...', 'info');
-
-                if (!response.ok) {
-                    let errorText = await response.text();
-                    try {
-                        const errorJson = JSON.parse(errorText);
-                        errorText = errorJson.error.message || errorText;
-                    } catch (e) { /* ignore */ }
-                    console.error(`Erro recebido do proxy: Status ${response.status}`, errorText);
-                    throw new Error(`Erro do proxy (${response.status}): ${errorText}`);
-                }
-
-                progressBar.style.width = '80%';
-                const data = await response.json();
-
-                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
-                    console.error(`Resposta inválida do proxy:`, data);
-                    throw new Error(`Resposta inválida do proxy`);
-                }
-
-                const translatedText = data.candidates[0].content.parts[0].text.trim();
-
-                return translatedText;
-
-            } catch (error) {
-                console.error('Erro na tradução com proxy:', error);
-                throw error;
+    const payload = {
+        "apiKey": apiKey,
+        "contents": [
+            {
+                "parts": [
+                    { "text": fullText }
+                ]
             }
+        ],
+        "generationConfig": {
+            "maxOutputTokens": 8000,
+            "temperature": 0.3
         }
+    };
+
+    try {
+        console.log(`Chamando proxy para tradução...`);
+        const response = await fetch(proxyUrl, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        progressBar.style.width = '60%';
+        showStatus('Processando resposta do Google Gemini via proxy...', 'info');
+
+        if (!response.ok) {
+            let errorText = await response.text();
+            try {
+                const errorJson = JSON.parse(errorText);
+                errorText = errorJson.error.message || errorText;
+            } catch (e) { /* ignore */ }
+            console.error(`Erro recebido do proxy: Status ${response.status}`, errorText);
+            throw new Error(`Erro do proxy (${response.status}): ${errorText}`);
+        }
+
+        progressBar.style.width = '80%';
+        const data = await response.json();
+
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content || !data.candidates[0].content.parts || !data.candidates[0].content.parts[0] || !data.candidates[0].content.parts[0].text) {
+            console.error(`Resposta inválida do proxy:`, data);
+            throw new Error(`Resposta inválida do proxy`);
+        }
+
+        const translatedText = data.candidates[0].content.parts[0].text.trim();
+
+        return translatedText;
+
+    } catch (error) {
+        console.error('Erro na tradução com proxy:', error);
+        throw error;
+    }
+}
 
         // Função para mostrar alertas de status
         function showStatus(message, type) {

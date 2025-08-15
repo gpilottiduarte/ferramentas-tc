@@ -1,0 +1,784 @@
+/* Palette inspirada no Segura® (tons de verde) */
+:root {
+  --color-primary: #007A5E;      /* verde Segura® */
+  --color-text: #102B4A;         /* texto escuro */
+  --color-bg: #F3FCF9;           /* fundo levemente esverdeado */
+  --color-sidebar-bg: #E6F8F2;    /* sidebar claro */
+  --color-border: #AEDCC8;       /* borda suave */
+  --color-callout-info-bg: #DAF5E6;
+  --color-callout-attention-bg: #EDFDF8;
+  --color-callout-alert-bg: #CFF0E1;
+}
+
+/* Reset e tipografia moderna */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+}
+
+/* Header fixo com título */
+header {
+  background: var(--color-primary);
+  color: #fff;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header h1 {
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  margin: 0;
+}
+
+/* Layout principal usando .container */
+.container {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Sidebar/TOC */
+#toc {
+  background: var(--color-sidebar-bg);
+  padding: 1rem;
+  position: sticky;
+  top: calc(4rem + 1rem);
+  border-right: 1px solid var(--color-border);
+  height: fit-content;
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-border);
+}
+
+/* Estilização da barra de rolagem para navegadores WebKit */
+#toc::-webkit-scrollbar {
+  width: 8px;
+}
+
+#toc::-webkit-scrollbar-track {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+#toc::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+#toc::-webkit-scrollbar-thumb:hover {
+  background: #005a45;
+}
+#toc h2 {
+  margin-bottom: 1rem;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+}
+#toc ul {
+  list-style: none;
+}
+#toc li {
+  margin: 0.5rem 0;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+}
+
+/* Área principal */
+main {
+  padding: 1rem 0;
+}
+main h2 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin-bottom: 1rem;
+}
+main h3 {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Caixa de busca */
+#global-search {
+  width: 100%;
+  max-width: 600px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#global-search:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 122, 94, 0.2);
+}
+
+/* Callouts/caixas de atenção */
+.callout {
+  border-left: 4px solid var(--color-border);
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 0.5rem;
+}
+.callout-info {
+  background: var(--color-callout-info-bg);
+}
+.callout-attention {
+  background: var(--color-callout-attention-bg);
+}
+.callout-alert {
+  background: var(--color-callout-alert-bg);
+}
+
+/* Links, listas e outros estilos */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+ul {
+  margin-left: 1.25rem;
+}
+ol {
+  margin-left: 1.25rem;
+}
+.code-result, code {
+  background: #f0f0f0;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+}
+.result {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+}
+.result:hover {
+  background: rgba(0, 122, 94, 0.1);
+}
+
+/* Classes utilitárias */
+.hidden {
+  display: none !important;
+}
+
+/* Loading indicator */
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(243, 252, 249, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-border);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading p {
+  color: var(--color-text);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Botão voltar */
+#back-button {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.2s;
+}
+
+#back-button:hover {
+  background: #005a45;
+}
+
+/* Resultados da busca */
+#search-results {
+  margin-top: 2rem;
+}
+
+#search-results .result {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+#search-results .result strong {
+  color: var(--color-primary);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+#search-results .result p {
+  margin: 0;
+  color: #666;
+}
+
+/* Destaque da busca */
+mark {
+  background: #ffeb3b;
+  padding: 0.1rem 0.2rem;
+  border-radius: 0.2rem;
+}
+
+/* Estados de foco melhorados */
+button:focus,
+a:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Animações suaves */
+.result {
+  transition: all 0.2s ease;
+}
+
+.result:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 94, 0.15);
+}
+
+#back-button:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  #toc {
+    position: static;
+  }
+  
+  header {
+    padding: 1rem;
+  }
+}
+
+/* Responsividade para telas muito pequenas */
+@media (max-width: 480px) {
+  .container {
+    grid-template-columns: 1fr;
+    padding: 0 0.5rem;
+  }
+  
+  header {
+    padding: 0.5rem;
+  }
+  
+  #global-search {
+    font-size: 16px; /* Previne zoom no iOS */
+  }
+  
+  .header-content {
+    gap: 0.5rem;
+  }
+}
+
+/* Estilos específicos para README.html */
+.nav-link {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+}
+
+.readme-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.readme-content {
+  padding: 3rem;
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  line-height: 1.7;
+}
+
+.readme-content h2 {
+  color: var(--color-primary);
+  font-size: 1.75rem;
+  margin-top: 3rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-border);
+  position: relative;
+}
+
+.readme-content h2:first-of-type {
+  margin-top: 0;
+}
+
+.readme-content h2::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--color-primary);
+}
+
+.readme-content h3 {
+  color: var(--color-text);
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.readme-content section {
+  margin-bottom: 2.5rem;
+}
+
+.readme-content p {
+  margin-bottom: 1.25rem;
+  color: #555;
+}
+
+.readme-content ul,
+.readme-content ol {
+  margin-bottom: 1.5rem;
+}
+
+.readme-content li {
+  margin-bottom: 0.5rem;
+  color: #555;
+}
+
+.readme-content strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  justify-content: center;
+}
+
+.badge {
+  padding: 0.5rem 1rem;
+  border-radius: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.badge-green {
+  background: #28a745;
+}
+
+.badge-blue {
+  background: #007bff;
+}
+
+.badge-orange {
+  background: #fd7e14;
+}
+
+.badge-purple {
+  background: #6f42c1;
+}
+
+.intro {
+  font-size: 1.25rem;
+  color: #666;
+  margin-bottom: 3rem;
+  line-height: 1.8;
+  text-align: center;
+  font-style: italic;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 2rem;
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--color-primary);
+}
+
+.feature-list {
+  list-style: none;
+  margin-left: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.feature-list li {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  padding-left: 3rem;
+}
+
+.feature-list li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 122, 94, 0.15);
+}
+
+.feature-list li::before {
+  content: "✨";
+  position: absolute;
+  left: 1rem;
+  top: 1.5rem;
+  font-size: 1.25rem;
+}
+
+.demo-link {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #005a45 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 122, 94, 0.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.875rem;
+}
+
+.demo-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 122, 94, 0.4);
+  text-decoration: none;
+}
+
+/* Estilos para listas de métricas */
+.readme-content ul:not(.feature-list):not(.checklist) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.75rem;
+  margin-left: 0;
+  list-style: none;
+}
+
+.readme-content ul:not(.feature-list):not(.checklist) li {
+  background: #f8f9fa;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.readme-content ul:not(.feature-list):not(.checklist) li:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 94, 0.1);
+}
+
+.readme-content ol {
+  counter-reset: step-counter;
+  list-style: none;
+  margin-left: 0;
+}
+
+.readme-content ol li {
+  counter-increment: step-counter;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  padding-left: 4rem;
+}
+
+.readme-content ol li::before {
+  content: counter(step-counter);
+  position: absolute;
+  left: 1rem;
+  top: 1.5rem;
+  background: var(--color-primary);
+  color: white;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.file-tree {
+  background: #f8f9fa;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.file-tree pre {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #333;
+}
+
+.code-block {
+  background: #f8f9fa;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+.code-block code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: #333;
+}
+
+.checklist {
+  list-style: none;
+  margin-left: 0;
+}
+
+.checklist li {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.checklist li.checked::before {
+  content: "✅";
+  position: absolute;
+  left: 0;
+}
+
+.troubleshoot-item {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-left: 4px solid var(--color-primary);
+  border-radius: 0.25rem;
+}
+
+.troubleshoot-item h4 {
+  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+}
+
+.readme-footer {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.version-info {
+  margin-bottom: 1rem;
+}
+
+.version-info p {
+  margin: 0.25rem 0;
+  color: #666;
+}
+
+.footer-center {
+  color: var(--color-primary);
+  font-size: 1.125rem;
+}
+
+/* Responsividade para README */
+@media (max-width: 768px) {
+  .readme-content {
+    padding: 1rem;
+  }
+  
+  .badges {
+    justify-content: center;
+  }
+  
+  .file-tree pre {
+    font-size: 0.75rem;
+  }
+  
+  .code-block {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .readme-content {
+    padding: 0.5rem;
+  }
+  
+  .badges {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .nav-link {
+    font-size: 0.875rem;
+  }
+}
+
+/* Estilos para o rodapé principal */
+.main-footer {
+  background: var(--color-primary);
+  color: white;
+  margin-top: 4rem;
+  padding: 2rem 0 1rem;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s, transform 0.2s;
+  font-weight: 500;
+}
+
+.footer-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+.footer-separator {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: bold;
+}
+
+.footer-version,
+.footer-company {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.footer-copyright {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.footer-copyright p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+}
+
+/* Responsividade do rodapé */
+@media (max-width: 768px) {
+  .footer-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .footer-separator {
+    display: none;
+  }
+  
+  .main-footer {
+    padding: 1.5rem 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    padding: 0 0.5rem;
+  }
+  
+  .footer-link {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+}
