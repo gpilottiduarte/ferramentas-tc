@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Guia de Estilos Segura®</title>
+  
+  <!-- Security headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+  
+  <style>
+    :root {
+      --color-primary: #007A5E;
+      --color-text: #102B4A;
+      --color-bg: #F3FCF9;
+      --color-border: #AEDCC8;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .offline-container {
+      max-width: 600px;
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin: 1rem;
+    }
+    
+    .offline-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .offline-title {
+      font-size: 2rem;
+      color: var(--color-primary);
+      margin-bottom: 1rem;
+    }
+    
+    .offline-message {
+      font-size: 1.125rem;
+      color: #666;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+    
+    .offline-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .btn-primary {
+      background: var(--color-primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #005a45;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: #f8f9fa;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+    
+    .btn-secondary:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+    }
+    
+    .connection-status {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 0.5rem;
+      border-left: 4px solid var(--color-primary);
+    }
+    
+    .status-online {
+      color: #28a745;
+      display: none;
+    }
+    
+    .status-offline {
+      color: #dc3545;
+    }
+    
+    .cached-info {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #e6f8f2;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    
+    @media (max-width: 480px) {
+      .offline-container {
+        padding: 1rem;
+      }
+      
+      .offline-title {
+        font-size: 1.5rem;
+      }
+      
+      .offline-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">🔌</div>
+    <h1 class="offline-title">Você está offline</h1>
+    <p class="offline-message">
+      Não foi possível conectar ao servidor. Verifique sua conexão com a internet ou VPN.
+    </p>
+    
+    <div class="offline-actions">
+      <button class="btn btn-primary" onclick="window.location.reload()">
+        🔄 Tentar novamente
+      </button>
+      <a href="/" class="btn btn-secondary">
+        🏠 Voltar ao início
+      </a>
+    </div>
+    
+    <div class="connection-status">
+      <div class="status-online">
+        ✅ <strong>Online:</strong> Conectado ao servidor
+      </div>
+      <div class="status-offline">
+        ❌ <strong>Offline:</strong> Sem conexão com o servidor
+      </div>
+    </div>
+    
+    <div class="cached-info">
+      <strong>📦 Conteúdo em cache:</strong><br>
+      Algumas páginas podem estar disponíveis offline se você as visitou anteriormente.
+    </div>
+  </div>
+  
+  <script>
+    // Check connection status
+    function updateConnectionStatus() {
+      const onlineStatus = document.querySelector('.status-online');
+      const offlineStatus = document.querySelector('.status-offline');
+      
+      if (navigator.onLine) {
+        onlineStatus.style.display = 'block';
+        offlineStatus.style.display = 'none';
+      } else {
+        onlineStatus.style.display = 'none';
+        offlineStatus.style.display = 'block';
+      }
+    }
+    
+    // Update status on load
+    updateConnectionStatus();
+    
+    // Listen for connection changes
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+    
+    // Auto-retry when online
+    window.addEventListener('online', () => {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    });
+    
+    // Keyboard shortcut for retry
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'r' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        window.location.reload();
+      }
+    });
+  </script>
+</body>
+</html>

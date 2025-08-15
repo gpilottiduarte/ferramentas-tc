@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia de Estilos Segura®</title>
+  
+  <!-- Meta tags de segurança -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self';">
+  
+  <!-- Favicon para evitar erro 404 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+  
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>Guia de Estilos Segura®</h1>
+      <input
+        type="text"
+        id="global-search"
+        placeholder="🔍 Buscar em todo o guia e pressione Enter"
+        aria-label="Buscar no guia"
+        role="searchbox"
+      />
+    </div>
+  </header>
+
+  <!-- Loading indicator -->
+  <div id="loading" class="loading hidden">
+    <div class="loading-spinner"></div>
+    <p>Carregando guia de estilos...</p>
+  </div>
+
+  <!-- View inicial com menu de seções -->
+  <div id="home-view" class="container">
+    <aside id="toc">
+      <h2>Seções</h2>
+      <ul id="section-list">
+        <!-- Seções serão carregadas dinamicamente -->
+      </ul>
+    </aside>
+
+    <main>
+      <h2>Bem-vindo ao Guia de Estilos Segura®</h2>
+      <p>Selecione uma seção no menu lateral para visualizar o conteúdo do guia de estilos.</p>
+      
+      <!-- Resultados da busca -->
+      <div id="search-results" aria-live="polite" aria-label="Resultados da busca"></div>
+    </main>
+  </div>
+
+  <!-- View de conteúdo -->
+  <div id="content-view" class="container hidden">
+    <aside>
+      <button id="back-button">← Voltar ao menu</button>
+    </aside>
+    
+    <main>
+      <div id="content">
+        <!-- Conteúdo da seção será carregado aqui -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Rodapé -->
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-links">
+        <a href="README.html" class="footer-link">Documentação</a>
+        <span class="footer-separator">•</span>
+        <span class="footer-version">Versão 2.1</span>
+        <span class="footer-separator">•</span>
+        <span class="footer-company">Segura®</span>
+      </div>
+      <div class="footer-copyright">
+        <p>&copy; 2025 Segura®. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('✅ Service Worker registered successfully:', registration.scope);
+            
+            // Handle updates
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('🔄 New service worker available');
+                  // Optionally show update notification to user
+                }
+              });
+            });
+          })
+          .catch(error => {
+            console.error('❌ Service Worker registration failed:', error);
+          });
+      });
+    } else {
+      console.log('Service Worker not supported');
+    }
+  </script>
+</body>
+</html>

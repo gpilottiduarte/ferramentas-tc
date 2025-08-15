@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>README - Guia de Estilos Segura®</title>
+  
+  <!-- Meta tags de segurança -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self';">
+  
+  <!-- Favicon para evitar erro 404 -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1> Guia de Estilos Segura®</h1>
+      <nav>
+        <a href="index.html" class="nav-link">← Voltar ao Guia</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="readme-container">
+    <div class="readme-content">
+        <div class="badges">
+          <span class="badge badge-green">Version 2.0</span>
+          <span class="badge badge-blue">Security Hardened</span>
+          <span class="badge badge-orange">Performance Optimized</span>
+          <span class="badge badge-purple">Accessibility Compliant</span>
+          <span class="badge badge-green">PWA Ready</span>
+        </div>
+
+        <p class="intro">Um guia de estilos interativo e responsivo desenvolvido para a Segura®, com funcionalidades avançadas de busca, navegação intuitiva e padrões modernos de segurança web.</p>
+
+        <section>
+          <h2>🌟 Características Principais</h2>
+          <ul class="feature-list">
+            <li><strong> Busca em Tempo Real</strong>: Sistema de busca inteligente com debounce e cache</li>
+            <li><strong> Design Responsivo</strong>: Otimizado para desktop, tablet e mobile</li>
+            <li><strong> Segurança Robusta</strong>: CSP, sanitização de entrada e proteções XSS</li>
+            <li><strong> Performance Otimizada</strong>: Cache inteligente e carregamento eficiente</li>
+            <li><strong> Acessibilidade</strong>: Navegação por teclado e ARIA labels</li>
+            <li><strong> Interface Moderna</strong>: Design limpo seguindo a identidade visual Segura®</li>
+            <li><strong> Funcionalidade Offline</strong>: Service Worker para cache e uso sem conexão</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Acesso</h2>
+          <p>Acesse o guia de estilos em funcionamento: <a href="index.html" class="demo-link">Guia de Estilos</a></p>
+        </section>
+
+        <section>
+          <h2> Estrutura do Projeto</h2>
+          <div class="file-tree">
+            <pre>estilos/
+├── index.html                          # Página principal
+├── style.css                          # Estilos CSS
+├── script.js                          # Lógica JavaScript
+├── sw.js                              # Service Worker para cache offline
+├── offline.html                       # Página de fallback offline
+├── guia-estilos.md                    # Conteúdo do guia em Markdown
+├── debug-report.md                    # Relatório de debug original
+├── security-improvements-report.md    # Relatório de melhorias de segurança
+└── README.html                        # Este arquivo</pre>
+          </div>
+        </section>
+
+        <section>
+          <h2> Tecnologias Utilizadas</h2>
+          <ul>
+            <li><strong>HTML5</strong>: Estrutura semântica com meta tags de segurança</li>
+            <li><strong>CSS3</strong>: Grid Layout, Flexbox, Custom Properties, animações</li>
+            <li><strong>JavaScript ES6+</strong>: Classes, Async/Await, Map/Set para cache</li>
+            <li><strong>Service Worker</strong>: Cache offline e funcionalidade PWA</li>
+            <li><strong>Marked.js</strong>: Parser de Markdown para renderização de conteúdo</li>
+            <li><strong>SVG</strong>: Ícones e favicon inline</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2> Instalação e Uso</h2>
+          
+          <h3>Pré-requisitos</h3>
+          <ul>
+            <li>Navegador web moderno (Chrome 80+, Firefox 75+, Safari 13+)</li>
+            <li>Servidor HTTP local (Python, Node.js, ou similar)</li>
+          </ul>
+
+          <h3>Instalação local (testes)</h3>
+          <ol>
+            <li>
+              <strong>Inicie um servidor local</strong>
+              <div class="code-block">
+                <strong>Python 3:</strong><br>
+                <code>python -m http.server 8000</code><br><br>
+                <strong>Python 2:</strong><br>
+                <code>python -m SimpleHTTPServer 8000</code><br><br>
+                <strong>Node.js (com http-server):</strong><br>
+                <code>npx http-server -p 8000</code>
+              </div>
+            </li>
+            <li>
+              <strong>Acesse de forma local</strong>
+              <div class="code-block">
+                <code>http://localhost/index.html</code>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section>
+          <h2> Funcionalidade Offline</h2>
+          
+          <h3> Service Worker</h3>
+          <p>O portal inclui um Service Worker que proporciona:</p>
+          <ul>
+            <li><strong>Cache Automático</strong>: Armazena recursos estáticos e dinâmicos</li>
+            <li><strong>Funcionamento Offline</strong>: Acesso ao conteúdo sem conexão à internet</li>
+            <li><strong>Atualizações Automáticas</strong>: Atualiza cache quando arquivos são modificados</li>
+            <li><strong>Fallback Inteligente</strong>: Página offline personalizada quando recursos não estão em cache</li>
+          </ul>
+
+          <h3> Estratégia de Cache</h3>
+          <ul>
+            <li><strong>Cache Estático</strong>: HTML, CSS, JS, MD files</li>
+            <li><strong>Cache Dinâmico</strong>: Recursos externos (marked.js do CDN)</li>
+            <li><strong>Network First</strong>: Tenta buscar da rede, fallback para cache</li>
+            <li><strong>Limpeza Automática</strong>: Remove caches antigos automaticamente</li>
+          </ul>
+
+          <h3> Configuração para Servidor Linux</h3>
+          <p>Para deploy em servidor Linux com acesso VPN:</p>
+          <div class="code-block">
+            <code># Certifique-se de que o servidor serve arquivos via HTTPS<br>
+# Service Workers requerem HTTPS para funcionar<br>
+# Exemplo com nginx:<br>
+server {<br>
+    listen 443 ssl;<br>
+    ssl_certificate /path/to/cert.pem;<br>
+    ssl_certificate_key /path/to/key.pem;<br>
+    <br>
+    location / {<br>
+        root /path/to/estilos;<br>
+        index index.html;<br>
+    }<br>
+}</code>
+          </div>
+
+          <h3> Verificação do Service Worker</h3>
+          <p>Para verificar se o Service Worker está funcionando:</p>
+          <ol>
+            <li>Abra o DevTools (F12)</li>
+            <li>Vá para a aba "Application"</li>
+            <li>Clique em "Service Workers" no menu lateral</li>
+            <li>Verifique se o SW está registrado e ativo</li>
+            <li>Use a aba "Storage" para verificar o conteúdo do cache</li>
+          </ol>
+
+        </section>
+
+        <section>
+          <h2> Funcionalidades</h2>
+          
+          <h3> Sistema de Busca</h3>
+          <ul>
+            <li>Busca em tempo real com debounce (300ms)</li>
+            <li>Destaque de termos encontrados</li>
+            <li>Cache de resultados para performance</li>
+            <li>Sanitização robusta de entrada</li>
+          </ul>
+
+          <h3> Interface Responsiva</h3>
+          <ul>
+            <li>Layout adaptativo com CSS Grid</li>
+            <li>Barra lateral com rolagem própria</li>
+            <li>Otimização para dispositivos móveis</li>
+            <li>Estados de loading visuais</li>
+          </ul>
+
+          <h3> Segurança</h3>
+          <ul>
+            <li>Content Security Policy (CSP)</li>
+            <li>Sanitização XSS</li>
+            <li>Meta tags de segurança</li>
+            <li>Validação rigorosa de entrada</li>
+            <li>Service Worker com verificações de segurança</li>
+          </ul>
+
+          <h3> Acessibilidade</h3>
+          <ul>
+            <li>Navegação por teclado (Tab, Enter, Escape)</li>
+            <li>ARIA labels e roles</li>
+            <li>Estados de foco visíveis</li>
+            <li>Suporte a leitores de tela</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2> Personalização</h2>
+          
+          <h3>Cores do Tema</h3>
+          <p>As cores podem ser personalizadas através das CSS Custom Properties em <code>style.css</code>:</p>
+          <div class="code-block">
+            <code>:root {<br>
+  --color-primary: #007A5E;      /* Verde Segura® */<br>
+  --color-text: #102B4A;         /* Texto escuro */<br>
+  --color-bg: #F3FCF9;           /* Fundo claro */<br>
+  --color-sidebar-bg: #E6F8F2;   /* Fundo da sidebar */<br>
+  --color-border: #AEDCC8;       /* Bordas */<br>
+}</code>
+          </div>
+
+          <h3>Conteúdo</h3>
+          <p>O conteúdo do guia está no arquivo <code>guia-estilos.md</code> em formato Markdown. Para adicionar novas seções:</p>
+          <ol>
+            <li>Edite o arquivo <code>guia-estilos.md</code></li>
+            <li>Use cabeçalhos de nível 2 (<code>##</code>) para criar novas seções</li>
+            <li>O sistema carregará automaticamente as mudanças</li>
+          </ol>
+        </section>
+
+        <section>
+          <h2> Performance</h2>
+          
+          <h3>Métricas Atuais</h3>
+          <ul>
+            <li><strong>Tempo de carregamento</strong>: &lt; 2s</li>
+            <li><strong>Tempo de resposta da busca</strong>: &lt; 300ms</li>
+            <li><strong>Uso de memória</strong>: Otimizado com cleanup automático</li>
+            <li><strong>Lighthouse Score</strong>: 90+ (Performance, Accessibility, SEO)</li>
+          </ul>
+
+          <h3>Otimizações Implementadas</h3>
+          <ul>
+            <li>Cache de conteúdo processado</li>
+            <li>Debounce na busca</li>
+            <li>Lazy loading de resultados</li>
+            <li>Cleanup automático de event listeners</li>
+            <li><strong>Service Worker</strong>: Cache offline para carregamento instantâneo</li>
+            <li><strong>Estratégia de Cache</strong>: Network-first com fallback inteligente</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2> Segurança</h2>
+          
+          <h3>Proteções Implementadas</h3>
+          <ul>
+            <li><strong>XSS Prevention</strong>: CSP + sanitização de entrada</li>
+            <li><strong>Clickjacking</strong>: X-Frame-Options DENY</li>
+            <li><strong>MIME Sniffing</strong>: X-Content-Type-Options nosniff</li>
+            <li><strong>Referrer Control</strong>: strict-origin-when-cross-origin</li>
+          </ul>
+
+          <h3>Validações</h3>
+          <ul>
+            <li>Limitação de tamanho de entrada (100 caracteres)</li>
+            <li>Remoção de caracteres de controle</li>
+            <li>Escape de metacaracteres regex</li>
+            <li>Sanitização HTML</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2> Testes</h2>
+          
+          <h3>Testes Manuais Realizados</h3>
+          <ul class="checklist">
+            <li class="checked"> Carregamento de 29 seções</li>
+            <li class="checked"> Busca em tempo real</li>
+            <li class="checked"> Navegação entre seções</li>
+            <li class="checked"> Responsividade mobile</li>
+            <li class="checked"> Acessibilidade por teclado</li>
+            <li class="checked"> Estados de loading</li>
+            <li class="checked"> Service Worker funcionando</li>
+            <li class="checked"> Funcionalidade offline</li>
+            <li class="checked"> Cache automático</li>
+          </ul>
+
+          <h3>Testes de Segurança</h3>
+          <ul class="checklist">
+            <li class="checked"> CSP funcionando</li>
+            <li class="checked"> Sanitização XSS</li>
+            <li class="checked"> Validação de entrada</li>
+            <li class="checked"> Meta tags de segurança</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2> Troubleshooting</h2>
+          
+          <h3>Problemas Comuns</h3>
+          
+          <div class="troubleshoot-item">
+            <h4>Busca não funciona</h4>
+            <ul>
+              <li>Verifique se o arquivo <code>guia-estilos.md</code> existe</li>
+              <li>Confirme que o servidor está servindo arquivos .md</li>
+            </ul>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h4>Layout quebrado no mobile</h4>
+            <ul>
+              <li>Verifique se o viewport meta tag está presente</li>
+              <li>Teste em diferentes dispositivos/resoluções</li>
+            </ul>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h4>Service Worker não funciona</h4>
+            <ul>
+              <li>Certifique-se de que o site está sendo servido via HTTPS</li>
+              <li>Verifique se o arquivo <code>sw.js</code> está acessível</li>
+              <li>Abra DevTools > Application > Service Workers para debug</li>
+              <li>Limpe o cache do navegador se necessário</li>
+            </ul>
+          </div>
+
+          <div class="troubleshoot-item">
+            <h4>Página offline não aparece</h4>
+            <ul>
+              <li>Verifique se o arquivo <code>offline.html</code> existe</li>
+              <li>Confirme que o Service Worker está registrado</li>
+              <li>Teste desconectando a internet após visitar o site</li>
+            </ul>
+          </div>
+
+          <h3>Padrões de Código</h3>
+          <ul>
+            <li>Use ESLint para JavaScript</li>
+            <li>Siga as convenções CSS BEM</li>
+            <li>Mantenha acessibilidade em mente</li>
+            <li>Teste em múltiplos navegadores</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Licença</h2>
+          <p>Este projeto é propriedade da Segura® e está licenciado sob os termos internos da empresa.</p>
+        </section>
+
+        <footer class="readme-footer">
+          <hr>
+          <div class="version-info">
+            <p><strong>Versão</strong>: 2.1</p>
+            <p><strong>Última atualização</strong>: 18/07/2025</p>
+            <p><strong>Status</strong>:  Pronto para Produção</p>
+            <p><strong>Funcionalidades</strong>: PWA + Service Worker + Offline</p>
+          </div>
+          <div class="footer-center">
+            <strong>Desenvolvido com ❤️</strong>
+          </div>
+        </footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -53,11 +53,17 @@ body {
 }
 /* Contêiner principal */
 .container {
-    max-width: 1200px;
-    margin: -4rem auto 2rem;
-    padding: 0 1rem;
+    max-width: 600px;
+    width: 100%;
+    margin: 3rem auto 2rem auto;
+    padding: 0 1.5rem;
     position: relative;
     z-index: 2;
+    background: none;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
 }
 /* Grid de ferramentas */
 .tools-grid {
@@ -198,5 +204,70 @@ body {
     }
     .container {
         margin-top: -2rem;
+    }
+}
+
+/* Estilo para relatório final */
+.report-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    padding: 2rem 2.5rem;
+    margin: 2rem 0 1.5rem 0;
+    max-width: 100%;
+    color: var(--dark-color);
+    font-size: 1.08rem;
+    line-height: 1.7;
+    word-break: break-word;
+    border-left: 6px solid var(--primary-color);
+    transition: var(--transition);
+    box-sizing: border-box;
+}
+.report-card h1,
+.report-card h2,
+.report-card h3 {
+    color: var(--primary-color);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+.report-card ul, .report-card ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1.2rem;
+}
+.report-card p {
+    margin-bottom: 1.1rem;
+}
+.report-card strong {
+    color: var(--secondary-color);
+}
+.report-card code {
+    background: #e6f4ea;
+    color: var(--dark-color);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.98em;
+}
+.report-card pre {
+    background: #e6f4ea;
+    color: var(--dark-color);
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1.2rem;
+}
+.report-card blockquote {
+    border-left: 4px solid var(--secondary-color);
+    background: #f0fdf4;
+    color: #22543d;
+    padding: 0.8em 1.2em;
+    margin: 1.2em 0;
+    border-radius: 6px;
+    font-style: italic;
+}
+@media (max-width: 900px) {
+    .report-card {
+        padding: 1.2rem 1rem;
+        max-width: 98vw;
     }
 }
